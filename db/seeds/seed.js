@@ -4,7 +4,6 @@ const format = require("pg-format");
 const seed = (data) => {
   const { articleData, commentData, topicData, userData } = data;
   // 1. create tables
-  // first drop tables in reverse order if they already exist
   // turn this into async await?
   console.log(
     `Seeding db: ${process.env.PGDATABASE} \n Current node_env: ${process.env.NODE_ENV}`
@@ -57,7 +56,79 @@ const seed = (data) => {
           body TEXT NOT NULL
         );`);
       })
-    // 2. insert data
+      // 2. insert data
+      .then(() => {
+        const topicsInfo = topicData.map((topic) => {
+          return [topic.slug, topic.description];
+        });
+        const topicsQueryStr = format(
+          `INSERT INTO topics
+    (slug, description)
+    VALUES
+    %L
+    RETURNING *;`,
+          topicsInfo
+        );
+        return db.query(topicsQueryStr);
+      })
+      // .then((topicsResult) => {
+      //   console.log(topicsResult.rows);
+      // })
+      .then(() => {
+        const usersInfo = userData.map((user) => {
+          return [user.username, user.avatar_url, user.name];
+        });
+        const usersQueryStr = format(
+          `INSERT INTO users
+          (username, avatar_url, name)
+          VALUES
+          %L
+          RETURNING *;`,
+          usersInfo
+        );
+        return db.query(usersQueryStr);
+      })
+      .then(() => {
+        const articlesInfo = articleData.map((article) => {
+          return [
+            article.title,
+            article.body,
+            article.votes,
+            article.topic,
+            article.author,
+            article.created_at,
+          ];
+        });
+        const articlesQueryStr = format(
+          `INSERT INTO articles 
+            (title, body, votes, topic, author, created_at)
+            VALUES
+            %L
+            RETURNING *`,
+          articlesInfo
+        );
+        return db.query(articlesQueryStr);
+      })
+      .then(() => {
+        const commentsInfo = commentData.map((comment) => {
+          return [
+            comment.author,
+            comment.article_id,
+            comment.votes,
+            comment.created_at,
+            comment.body,
+          ];
+        });
+        const commentsQueryStr = format(
+          `INSERT INTO comments
+          (author, article_id, votes, created_at, body)
+          VALUES
+          %L
+          RETURNING *;`,
+          commentsInfo
+        );
+        return db.query(commentsQueryStr);
+      })
   );
 };
 
