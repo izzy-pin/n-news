@@ -13,6 +13,13 @@ exports.selectArticleById = (id) => {
       [id]
     )
     .then((result) => {
-      return result.rows[0];
+      const article = result.rows[0];
+      if (!article) {
+        return Promise.reject({
+          status: 404,
+          msg: `No article found for article_id: ${id}`,
+        });
+      }
+      return article;
     });
 };

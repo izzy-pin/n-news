@@ -25,7 +25,7 @@ describe("GET /api/topics", () => {
         });
       });
   });
-  test("status 404: responds with 'path not found'", () => {
+  test("status 404: responds with 'Path not found'", () => {
     return request(app)
       .get("/api/top")
       .expect(404)
@@ -70,6 +70,28 @@ describe("GET /api/articles/:article_id", () => {
             comment_count: "0",
           })
         );
+      });
+  });
+  test("status 404: responds with 'Path not found'", () => {
+    return request(app)
+      .get("/api/artcles/2")
+      .expect(404)
+      .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
+  });
+  test("status 404: responds with 'No article found for article_id: :article_id'", () => {
+    return request(app)
+      .get("/api/articles/1000")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("No article found for article_id: 1000");
+      });
+  });
+  test("status 400: responds with 'Bad request'", () => {
+    return request(app)
+      .get("/api/articles/news")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
       });
   });
 });
