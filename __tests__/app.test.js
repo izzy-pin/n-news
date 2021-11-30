@@ -25,4 +25,10 @@ describe("GET /api/topics", () => {
         });
       });
   });
+  test("status 404: responds with 'path not found'", () => {
+    return request(app)
+      .get("/api/top")
+      .expect(404)
+      .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
+  });
 });
