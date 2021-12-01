@@ -303,6 +303,18 @@ describe("GET /api/articles", () => {
           expect(articles).toBeSortedBy("created_at", { descending: true });
         });
     });
+    test("status 404: responds with 'Path not found'", () => {
+      return request(app)
+        .get("/api/artsi?sort_by=created_at")
+        .expect(404)
+        .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
+    });
+    test("status 400: responds with 'Invalid sort_by query'", () => {
+      return request(app)
+        .get("/api/articles?sort_by=fake_news")
+        .expect(400)
+        .then(({ body: { msg } }) => expect(msg).toBe("Invalid sort_by query"));
+    });
   });
   describe("order queries", () => {
     test("status 200: articles with no query in descending order, sorted by date by default", () => {
@@ -335,9 +347,15 @@ describe("GET /api/articles", () => {
           expect(articles).toBeSortedBy("created_at");
         });
     });
+    test("status 400: responds with 'Invalid order query'", () => {
+      return request(app)
+        .get("/api/articles?order=big-to-small")
+        .expect(400)
+        .then(({ body: { msg } }) => expect(msg).toBe("Invalid order query"));
+    });
   });
   describe("filter by topic query", () => {
-    test.only("status 200: where query value topic exists, return a filtered by topic, sorted by date, desc", () => {
+    test("status 200: where query value topic 'mitch' exists, return a filtered by topic, sorted by date, desc", () => {
       return request(app)
         .get("/api/articles?topic=mitch")
         .expect(200)
@@ -346,6 +364,31 @@ describe("GET /api/articles", () => {
           expect(articles).toHaveLength(11);
           expect(articles).toBeSortedBy("created_at", { descending: true });
         });
+    });
+    test("status 200: where query value topic 'cats' exists, return a filtered by topic, sorted by date, desc", () => {
+      return request(app)
+        .get("/api/articles?topic=cats")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(1);
+          expect(articles).toBeSortedBy("created_at", { descending: true });
+        });
+    });
+    test("status 200: where query value topic 'paper' exists but not articles have it, return an empty array", () => {
+      return request(app)
+        .get("/api/articles?topic=paper")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(0);
+        });
+    });
+    test("status 400: responds with 'Invalid topic query'", () => {
+      return request(app)
+        .get("/api/articles?topic=lawnmowers")
+        .expect(400)
+        .then(({ body: { msg } }) => expect(msg).toBe("Invalid topic query"));
     });
   });
 });
