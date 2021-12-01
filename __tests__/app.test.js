@@ -95,3 +95,46 @@ describe("GET /api/articles/:article_id", () => {
       });
   });
 });
+
+describe("PATCH /api/articles/:article_id", () => {
+  test("status 200: responds with the updated article where votes is a +ve num", () => {
+    return request(app)
+      .patch("/api/articles/3")
+      .send({ inc_votes: 1 })
+      .expect(200)
+      .then(({ body: { article } }) => {
+        expect(article).toEqual(
+          expect.objectContaining({
+            author: "icellusedkars",
+            title: "Eight pug gifs that remind me of mitch",
+            article_id: 3,
+            body: "some gifs",
+            topic: "mitch",
+            created_at: expect.any(String),
+            votes: 1,
+            comment_count: "2",
+          })
+        );
+      });
+  });
+  test("status 200: responds with the updated article where votes is a -ve num", () => {
+    return request(app)
+      .patch("/api/articles/3")
+      .send({ inc_votes: -100 })
+      .expect(200)
+      .then(({ body: { article } }) => {
+        expect(article).toEqual(
+          expect.objectContaining({
+            author: "icellusedkars",
+            title: "Eight pug gifs that remind me of mitch",
+            article_id: 3,
+            body: "some gifs",
+            topic: "mitch",
+            created_at: expect.any(String),
+            votes: -100,
+            comment_count: "2",
+          })
+        );
+      });
+  });
+});

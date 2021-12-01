@@ -23,3 +23,23 @@ exports.selectArticleById = (id) => {
       return article;
     });
 };
+
+exports.updateArticleByArticleId = (inc_votes, id) => {
+  return db
+    .query(
+      `
+  UPDATE articles SET votes = votes + $1
+  WHERE article_id = $2 RETURNING votes;`,
+      [inc_votes, id]
+    )
+    .then((votes) => {
+      const voteTotal = votes.rows[0];
+      if (!voteTotal) {
+        return Promise.reject({
+          status: 404,
+          msg: `No article found for article_id: ${id}, cannot update votes`,
+        });
+      }
+    });
+  // return Promise.resolve({ votes: inc_votes });
+};
