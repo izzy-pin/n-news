@@ -137,4 +137,70 @@ describe("PATCH /api/articles/:article_id", () => {
         );
       });
   });
+  test("status 200: responds with updated article if votes is a num and ignores any extra info on the request object", () => {
+    return request(app)
+      .patch("/api/articles/3")
+      .send({ dont_use_this: "but still update votes", inc_votes: -100 })
+      .expect(200)
+      .then(({ body: { article } }) => {
+        expect(article).toEqual(
+          expect.objectContaining({
+            author: "icellusedkars",
+            title: "Eight pug gifs that remind me of mitch",
+            article_id: 3,
+            body: "some gifs",
+            topic: "mitch",
+            created_at: expect.any(String),
+            votes: -100,
+            comment_count: "2",
+          })
+        );
+      });
+  });
+  test("status 404: responds with 'Path not found'", () => {
+    return request(app)
+      .patch("/api/arts/2")
+      .send({ inc_votes: -100 })
+      .expect(404)
+      .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
+    // do a SELECT statement here to check votes hasn't been updated?
+  });
+  test("status 404: responds with 'No article found for article_id: :article_id, cannot update votes'", () => {
+    return request(app)
+      .patch("/api/articles/2607")
+      .send({ inc_votes: -100 })
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          "No article found for article_id: 2607, cannot update votes"
+        );
+      });
+  });
+  test("status 400: responds with 'Bad request'", () => {
+    return request(app)
+      .patch("/api/articles/not_an_id")
+      .send({ inc_votes: 4 })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
+  test("status 400: responds with 'Bad request' when inc_votes invalid datatype", () => {
+    return request(app)
+      .patch("/api/articles/3")
+      .send({ inc_votes: "banana" })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
+  test("status 400: responds with 'Bad request, must have inc_votes' when object on body doesn't include inc_votes", () => {
+    return request(app)
+      .patch("/api/articles/3")
+      .send({ name: "steve" })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request, must have inc_votes");
+      });
+  });
 });

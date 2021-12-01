@@ -25,6 +25,12 @@ exports.selectArticleById = (id) => {
 };
 
 exports.updateArticleByArticleId = (inc_votes, id) => {
+  if (!inc_votes) {
+    return Promise.reject({
+      status: 400,
+      msg: `Bad request, must have inc_votes`,
+    });
+  }
   return db
     .query(
       `
