@@ -204,3 +204,148 @@ describe("PATCH /api/articles/:article_id", () => {
       });
   });
 });
+
+describe("GET /api/articles", () => {
+  describe("sort_by queries", () => {
+    test("status 200: responds with object with key of articles and an array of articles, sorted by date by default", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(12);
+          expect(articles).toBeSortedBy("created_at", { descending: true });
+          articles.forEach((article) => {
+            expect(article).toEqual(
+              expect.objectContaining({
+                author: expect.any(String),
+                title: expect.any(String),
+                article_id: expect.any(Number),
+                topic: expect.any(String),
+                created_at: expect.any(String),
+                votes: expect.any(Number),
+                comment_count: expect.any(String),
+              })
+            );
+          });
+        });
+    });
+    test("status 200: articles are sorted by article_id", () => {
+      return request(app)
+        .get("/api/articles?sort_by=article_id")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(12);
+          expect(articles).toBeSortedBy("article_id", { descending: true });
+        });
+    });
+    test("status 200: articles are sorted by author", () => {
+      return request(app)
+        .get("/api/articles?sort_by=author")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(12);
+          expect(articles).toBeSortedBy("author", { descending: true });
+        });
+    });
+    test("status 200: articles are sorted by title", () => {
+      return request(app)
+        .get("/api/articles?sort_by=title")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(12);
+          expect(articles).toBeSortedBy("title", { descending: true });
+        });
+    });
+    test("status 200: articles are sorted by topic", () => {
+      return request(app)
+        .get("/api/articles?sort_by=topic")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(12);
+          expect(articles).toBeSortedBy("topic", { descending: true });
+        });
+    });
+    test("status 200: articles are sorted by votes", () => {
+      return request(app)
+        .get("/api/articles?sort_by=votes")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(12);
+          expect(articles).toBeSortedBy("votes", { descending: true });
+        });
+    });
+    test("status 200: articles are sorted by comment_count", () => {
+      return request(app)
+        .get("/api/articles?sort_by=comment_count")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(12);
+          expect(articles).toBeSortedBy("comment_count", {
+            descending: true,
+            coerce: true,
+          });
+        });
+    });
+    test("status 200: articles are sorted by created_at", () => {
+      return request(app)
+        .get("/api/articles?sort_by=created_at")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(12);
+          expect(articles).toBeSortedBy("created_at", { descending: true });
+        });
+    });
+  });
+  describe("order queries", () => {
+    test("status 200: articles with no query in descending order, sorted by date by default", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(12);
+          expect(articles).toBeSortedBy("created_at", { descending: true });
+        });
+    });
+    test("status 200: where query order=desc specified, articles sorted by date, descending", () => {
+      return request(app)
+        .get("/api/articles?order=desc")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(12);
+          expect(articles).toBeSortedBy("created_at", { descending: true });
+        });
+    });
+    test("status 200: where query order=asc specified, articles sorted by date, ascending", () => {
+      return request(app)
+        .get("/api/articles?order=asc")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(12);
+          expect(articles).toBeSortedBy("created_at");
+        });
+    });
+  });
+  describe("filter by topic query", () => {
+    test.only("status 200: where query value topic exists, return a filtered by topic, sorted by date, desc", () => {
+      return request(app)
+        .get("/api/articles?topic=mitch")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(11);
+          expect(articles).toBeSortedBy("created_at", { descending: true });
+        });
+    });
+  });
+});

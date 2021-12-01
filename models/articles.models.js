@@ -47,5 +47,21 @@ exports.updateArticleByArticleId = (inc_votes, id) => {
         });
       }
     });
-  // return Promise.resolve({ votes: inc_votes });
+};
+
+exports.selectArticles = (sort_by = "created_at", order = "desc", topic) => {
+  let articlesQueryString = `
+  SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, COUNT(comments.article_id) AS comment_count 
+  FROM articles 
+  LEFT JOIN comments 
+  ON comments.article_id = articles.article_id `;
+
+  if (typeof topic === "string") {
+    articlesQueryString += `WHERE articles.topic = '${topic}' `;
+  }
+
+  articlesQueryString += `GROUP BY articles.article_id
+  ORDER BY ${sort_by} ${order};`;
+
+  return db.query(articlesQueryString).then((results) => results.rows);
 };
