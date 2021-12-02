@@ -5,9 +5,9 @@ const seed = (data) => {
   const { articleData, commentData, topicData, userData } = data;
   // 1. create tables
   // turn this into async await?
-  console.log(
-    `Seeding db: ${process.env.PGDATABASE} \n Current node_env: ${process.env.NODE_ENV}`
-  );
+  // console.log(
+  //   `Seeding db: ${process.env.PGDATABASE} \n Current node_env: ${process.env.NODE_ENV}`
+  // );
 
   return (
     db
