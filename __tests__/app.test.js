@@ -395,56 +395,165 @@ describe("GET /api/articles", () => {
   });
 });
 
-describe("GET /api/articles/:article_id/comments", () => {
-  test("status 200: responds with object comments: array of comments of the given article_id", () => {
-    return request(app)
-      .get("/api/articles/5/comments")
-      .expect(200)
-      .then(({ body: { comments } }) => {
-        expect(Array.isArray(comments)).toBe(true);
-        expect(comments).toHaveLength(2);
-        comments.forEach((comment) => {
+describe("/api/articles/:article_id/comments", () => {
+  describe("GET /api/articles/:article_id/comments", () => {
+    test("status 200: responds with object comments: array of comments of the given article_id", () => {
+      return request(app)
+        .get("/api/articles/5/comments")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(Array.isArray(comments)).toBe(true);
+          expect(comments).toHaveLength(2);
+          comments.forEach((comment) => {
+            expect(comment).toEqual(
+              expect.objectContaining({
+                comment_id: expect.any(Number),
+                votes: expect.any(Number),
+                created_at: expect.any(String),
+                author: expect.any(String),
+                body: expect.any(String),
+              })
+            );
+          });
+        });
+    });
+    test("status 200: responds with an object with key comments and value of an empty array when an article has no comments", () => {
+      return request(app)
+        .get("/api/articles/4/comments")
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          expect(Array.isArray(comments)).toBe(true);
+          expect(comments).toHaveLength(0);
+        });
+    });
+    test("status 404: responds with 'Path not found'", () => {
+      return request(app)
+        .get("/api/articles/2/comme")
+        .expect(404)
+        .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
+    });
+    test("status 404: responds with 'No comments found for article_id: :article_id'", () => {
+      return request(app)
+        .get("/api/articles/1000/comments")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("No article found for article_id: 1000");
+        });
+    });
+    test("status 400: responds with 'Bad request'", () => {
+      return request(app)
+        .get("/api/articles/not-an-article/comments")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+  });
+
+  describe.only("POST /api/articles/:article_id/comments", () => {
+    test("status 201, responds with the posted comment taken from req body", () => {
+      return request(app)
+        .post("/api/articles/5/comments")
+        .send({ username: "butter_bridge", body: "love this article!" })
+        .expect(201)
+        .then(({ body: { comment } }) => {
           expect(comment).toEqual(
             expect.objectContaining({
-              comment_id: expect.any(Number),
-              votes: expect.any(Number),
+              comment_id: 19,
+              votes: 0,
               created_at: expect.any(String),
-              author: expect.any(String),
-              body: expect.any(String),
+              author: "butter_bridge",
+              body: "love this article!",
             })
           );
         });
-      });
-  });
-  test("status 200: responds with an object with key comments and value of an empty array when an article has no comments", () => {
-    return request(app)
-      .get("/api/articles/4/comments")
-      .expect(200)
-      .then(({ body: { comments } }) => {
-        expect(Array.isArray(comments)).toBe(true);
-        expect(comments).toHaveLength(0);
-      });
-  });
-  test("status 404: responds with 'Path not found'", () => {
-    return request(app)
-      .get("/api/articles/2/comme")
-      .expect(404)
-      .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
-  });
-  test("status 404: responds with 'No comments found for article_id: :article_id'", () => {
-    return request(app)
-      .get("/api/articles/1000/comments")
-      .expect(404)
-      .then(({ body: { msg } }) => {
-        expect(msg).toBe("No article found for article_id: 1000");
-      });
-  });
-  test("status 400: responds with 'Bad request'", () => {
-    return request(app)
-      .get("/api/articles/not-an-article/comments")
-      .expect(400)
-      .then(({ body: { msg } }) => {
-        expect(msg).toBe("Bad request");
-      });
+    });
+    test("status 201, responds with the posted comment for an article with no comments", () => {
+      return request(app)
+        .post("/api/articles/2/comments")
+        .send({ username: "butter_bridge", body: "love this article!" })
+        .expect(201)
+        .then(({ body: { comment } }) => {
+          expect(comment).toEqual(
+            expect.objectContaining({
+              comment_id: 19,
+              votes: 0,
+              created_at: expect.any(String),
+              author: "butter_bridge",
+              body: "love this article!",
+            })
+          );
+        });
+    });
+    test("status 201, responds with the posted comment for an article when body isn't given as a string", () => {
+      return request(app)
+        .post("/api/articles/2/comments")
+        .send({ username: "butter_bridge", body: true })
+        .expect(201)
+        .then(({ body: { comment } }) => {
+          expect(comment).toEqual(
+            expect.objectContaining({
+              comment_id: 19,
+              votes: 0,
+              created_at: expect.any(String),
+              author: "butter_bridge",
+              body: "true",
+            })
+          );
+        });
+    });
+    test("status 404: responds with 'Path not found'", () => {
+      return request(app)
+        .post("/api/articles/2/comms")
+        .send({ username: "butter_bridge", body: "love this article!" })
+        .expect(404)
+        .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
+      // do a SELECT statement here to check votes hasn't been updated?
+    });
+    test("status 404: responds with 'No article found for article_id: :article_id, cannot update votes'", () => {
+      return request(app)
+        .post("/api/articles/2607/comments")
+        .send({ username: "butter_bridge", body: "love this article!" })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("No article found for article_id: 2607");
+        });
+    });
+    test("status 400: responds with 'Bad request' when article_id is incorrect dt", () => {
+      return request(app)
+        .post("/api/articles/not_an_id/comments")
+        .send({ username: "butter_bridge", body: "love this article!" })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
+    test("status 400: responds with 'Bad request, must include a comment' when object on body doesn't include body", () => {
+      return request(app)
+        .post("/api/articles/2/comments")
+        .send({ username: "butter_bridge" })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request, must include a comment");
+        });
+    });
+    test("status 400: responds with 'Bad request, must include a comment' when object on body when body is an empty string", () => {
+      return request(app)
+        .post("/api/articles/2/comments")
+        .send({ username: "butter_bridge", body: "" })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request, must include a comment");
+        });
+    });
+    test("status 400: responds with 'Bad request, must have a username' when no username given", () => {
+      return request(app)
+        .post("/api/articles/2/comments")
+        .send({ body: "hello" })
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request, must have a username");
+        });
+    });
   });
 });
