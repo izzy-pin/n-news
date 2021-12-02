@@ -593,3 +593,20 @@ describe("DELETE /api/comments/:comment_id", () => {
       });
   });
 });
+
+describe("GET /api", () => {
+  test("status 200, responds with json object of all available endpoints", () => {
+    return request(app)
+      .get("/api")
+      .expect(200)
+      .then(({ text }) => {
+        expect(typeof text).toBe("string");
+      });
+  });
+  test("status 404: responds with 'Path not found'", () => {
+    return request(app)
+      .get("/ap")
+      .expect(404)
+      .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
+  });
+});
