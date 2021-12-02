@@ -10,7 +10,7 @@
     }
   },
   "GET /api/articles": {
-    "description": "serves an array of all articles",
+    "description": "serves an array of all articles (newest to oldest), or all articles matching one or multiple queries: topic - filters articles by a valid topic slug, sort_by - sorts articles by valid article key and will default to date unless given an additional order query and order - asc orders articles in alphabetical order (if sorting by author, title, body or topic) or numerical lowest to highest (for article_id, votes and comment_count, in the case of created_at this means oldest to newest) or desc, which therefore sorts articles in reverse alphabetical and numerical order and for created_at means newest to oldest, order will default to descending",
     "queries": ["topic", "sort_by", "order"],
     "exampleResponse": {
       "articles": [
