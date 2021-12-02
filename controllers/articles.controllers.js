@@ -2,12 +2,13 @@ const {
   selectArticleById,
   updateArticleByArticleId,
   selectArticles,
+  checkArticleExists,
 } = require("../models/articles.models");
 
 exports.getArticleByArticleId = (req, res, next) => {
   const { article_id } = req.params;
-  selectArticleById(article_id)
-    .then((article) => {
+  Promise.all([selectArticleById(article_id), checkArticleExists(article_id)])
+    .then(([article]) => {
       res.status(200).send({ article });
     })
     .catch((err) => {

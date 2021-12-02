@@ -9,5 +9,7 @@ exports.selectCommentsByArticleId = (id) => {
         GROUP BY comment_id;`,
       [id]
     )
-    .then((results) => results.rows);
+    .then((results) => {
+      return results.rows;
+    });
 };

@@ -425,4 +425,26 @@ describe("GET /api/articles/:article_id/comments", () => {
         expect(comments).toHaveLength(0);
       });
   });
+  test("status 404: responds with 'Path not found'", () => {
+    return request(app)
+      .get("/api/articles/2/comme")
+      .expect(404)
+      .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
+  });
+  test("status 404: responds with 'No comments found for article_id: :article_id'", () => {
+    return request(app)
+      .get("/api/articles/1000/comments")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("No article found for article_id: 1000");
+      });
+  });
+  test("status 400: responds with 'Bad request'", () => {
+    return request(app)
+      .get("/api/articles/not-an-article/comments")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
 });
