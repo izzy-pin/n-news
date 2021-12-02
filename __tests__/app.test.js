@@ -450,7 +450,7 @@ describe("/api/articles/:article_id/comments", () => {
     });
   });
 
-  describe.only("POST /api/articles/:article_id/comments", () => {
+  describe("POST /api/articles/:article_id/comments", () => {
     test("status 201, responds with the posted comment taken from req body", () => {
       return request(app)
         .post("/api/articles/5/comments")
@@ -508,7 +508,7 @@ describe("/api/articles/:article_id/comments", () => {
         .send({ username: "butter_bridge", body: "love this article!" })
         .expect(404)
         .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
-      // do a SELECT statement here to check votes hasn't been updated?
+      // do a SELECT statement here to check comment hasn't been added?
     });
     test("status 404: responds with 'No article found for article_id: :article_id, cannot update votes'", () => {
       return request(app)
@@ -555,5 +555,41 @@ describe("/api/articles/:article_id/comments", () => {
           expect(msg).toBe("Bad request, must have a username");
         });
     });
+  });
+});
+
+describe("DELETE /api/comments/:comment_id", () => {
+  test("status 204: no content returned", () => {
+    return request(app)
+      .delete("/api/comments/6")
+      .expect(204)
+      .then(() => {
+        return db
+          .query(`SELECT exists(SELECT 1 FROM comments where comment_id=6);`)
+          .then(({ rows }) => {
+            expect(rows[0].exists).toBe(false);
+          });
+      });
+  });
+  test("status 404: responds with 'Path not found'", () => {
+    return request(app)
+      .delete("/api/commes/4")
+      .expect(404)
+      .then(({ body: { msg } }) => expect(msg).toBe("Path not found"))
+      .then(() => {
+        return db
+          .query(`SELECT exists(SELECT 1 FROM comments where comment_id=4);`)
+          .then(({ rows }) => {
+            expect(rows[0].exists).toBe(true);
+          });
+      });
+  });
+  test("status 404: responds with 'No article found for article_id: :article_id, cannot update votes'", () => {
+    return request(app)
+      .delete("/api/comments/2607")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("No comment found for comment_id: 2607");
+      });
   });
 });
