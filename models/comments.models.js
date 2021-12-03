@@ -60,7 +60,40 @@ exports.insertCommentForArticleId = (username, body, id) => {
 };
 
 exports.removeCommentById = (id) => {
-  return db.query("DELETE FROM comments WHERE comment_id = $1 RETURNING *;", [
-    id,
-  ]);
+  return db.query(
+    `
+  DELETE FROM comments WHERE comment_id = $1 RETURNING *;
+  `,
+    [id]
+  );
+};
+
+exports.updateCommentByCommentId = (id, votes) => {
+  if (!votes) {
+    return Promise.reject({
+      status: 400,
+      msg: "Bad request, must have inc_votes",
+    });
+  }
+  return db
+    .query(
+      `
+  UPDATE comments SET votes = votes + $1
+  WHERE comment_id = $2 RETURNING votes;`,
+      [votes, id]
+    )
+    .then((votes) => {});
+};
+
+exports.selectCommentByCommentId = (id) => {
+  return db
+    .query(
+      `SELECT * 
+        FROM comments 
+        WHERE comment_id = $1;`,
+      [id]
+    )
+    .then((results) => {
+      return results.rows[0];
+    });
 };

@@ -725,7 +725,7 @@ describe("GET /api/users", () => {
   });
 });
 
-describe.only("GET /api/users/:username", () => {
+describe("GET /api/users/:username", () => {
   test("status 200, responds with a user object with properties username, avatar_url and name", () => {
     return request(app)
       .get("/api/users/lurker")
@@ -753,6 +753,123 @@ describe.only("GET /api/users/:username", () => {
       .expect(404)
       .then(({ body: { msg } }) => {
         expect(msg).toBe("No user exists for username: 1amJonSn0w");
+      });
+  });
+});
+
+describe("PATCH /api/comments/:comment_id", () => {
+  test("status 200, responds with updated comment when req body given a valid inc_votes int", () => {
+    return request(app)
+      .patch("/api/comments/3")
+      .send({ inc_votes: 1 })
+      .expect(200)
+      .then(({ body: { comment } }) => {
+        expect(comment).toEqual(
+          expect.objectContaining({
+            comment_id: 3,
+            body: "Replacing the quiet elegance of the dark suit and tie with the casual indifference of these muted earth tones is a form of fashion suicide, but, uh, call me crazy — onyou it works.",
+            votes: 101,
+            author: "icellusedkars",
+            article_id: 1,
+            created_at: expect.any(String),
+          })
+        );
+      })
+      .then(() => {
+        return db
+          .query(`SELECT * FROM comments WHERE comment_id=3;`)
+          .then(({ rows }) => {
+            expect(rows[0].votes).toBe(101);
+          });
+      });
+  });
+  test("status 200: responds with updated article if votes is a num and ignores any extra info on the request object", () => {
+    return request(app)
+      .patch("/api/comments/3")
+      .send({ dont_use_this: "but still update votes", inc_votes: -100 })
+      .expect(200)
+      .then(({ body: { comment } }) => {
+        expect(comment).toEqual(
+          expect.objectContaining({
+            comment_id: 3,
+            body: "Replacing the quiet elegance of the dark suit and tie with the casual indifference of these muted earth tones is a form of fashion suicide, but, uh, call me crazy — onyou it works.",
+            votes: 0,
+            author: "icellusedkars",
+            article_id: 1,
+            created_at: expect.any(String),
+          })
+        );
+      })
+      .then(() => {
+        return db
+          .query(`SELECT * FROM comments WHERE comment_id=3;`)
+          .then(({ rows }) => {
+            expect(rows[0].votes).toBe(0);
+          });
+      });
+  });
+  test("status 404: responds with 'Path not found'", () => {
+    return request(app)
+      .patch("/api/comms/1")
+      .send({ inc_votes: -100 })
+      .expect(404)
+      .then(({ body: { msg } }) => expect(msg).toBe("Path not found"))
+      .then(() => {
+        return db
+          .query(`SELECT votes FROM comments WHERE comment_id=1;`)
+          .then(({ rows }) => {
+            expect(rows[0].votes).toBe(16);
+          });
+      });
+  });
+  test("status 404: responds with 'No comment found for comment_id: :comment_id'", () => {
+    return request(app)
+      .patch("/api/comments/2607")
+      .send({ inc_votes: -100 })
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("No comment found for comment_id: 2607");
+      });
+  });
+  test("status 400: responds with 'Bad request'", () => {
+    return request(app)
+      .patch("/api/comments/not_an_id")
+      .send({ inc_votes: 4 })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
+  test("status 400: responds with 'Bad request' when inc_votes invalid datatype", () => {
+    return request(app)
+      .patch("/api/comments/1")
+      .send({ inc_votes: 1.1 })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      })
+      .then(() => {
+        return db
+          .query(`SELECT votes FROM comments WHERE comment_id=1;`)
+          .then(({ rows }) => {
+            expect(rows[0].votes).toBe(16);
+          });
+      });
+  });
+  test("status 400: responds with 'Bad request, must have inc_votes' when object on body doesn't include inc_votes", () => {
+    return request(app)
+      .patch("/api/comments/3")
+      .send({ name: "steve" })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request, must have inc_votes");
+      })
+      .then(() => {
+        return db
+          .query(`SELECT votes FROM comments WHERE comment_id=3;`)
+          .then(({ rows }) => {
+            expect(rows[0].votes).toBe(100);
+          });
       });
   });
 });
