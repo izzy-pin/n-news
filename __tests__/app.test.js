@@ -3,6 +3,7 @@ const testData = require("../db/data/test-data/index.js");
 const seed = require("../db/seeds/seed.js");
 const request = require("supertest");
 const app = require("../app");
+const e = require("express");
 
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
@@ -694,6 +695,31 @@ describe("GET /api", () => {
   test("status 404: responds with 'Path not found'", () => {
     return request(app)
       .get("/ap")
+      .expect(404)
+      .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
+  });
+});
+
+describe("GET /api/users", () => {
+  test("status 200, responds with an array of objects {username: 'username'} no name or avatar_url", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then(({ body: { users } }) => {
+        expect(Array.isArray(users)).toBe(true);
+        expect(users).toHaveLength(4);
+        users.forEach((user) => {
+          expect(user).toEqual(
+            expect.objectContaining({
+              username: expect.any(String),
+            })
+          );
+        });
+      });
+  });
+  test("status 404: responds with 'Path not found'", () => {
+    return request(app)
+      .get("/api/us")
       .expect(404)
       .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
   });
