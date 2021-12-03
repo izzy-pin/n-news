@@ -724,3 +724,35 @@ describe("GET /api/users", () => {
       .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
   });
 });
+
+describe.only("GET /api/users/:username", () => {
+  test("status 200, responds with a user object with properties username, avatar_url and name", () => {
+    return request(app)
+      .get("/api/users/lurker")
+      .expect(200)
+      .then(({ body: { user } }) => {
+        expect(user).toEqual(
+          expect.objectContaining({
+            username: "lurker",
+            name: "do_nothing",
+            avatar_url:
+              "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+          })
+        );
+      });
+  });
+  test("status 404: responds with 'Path not found'", () => {
+    return request(app)
+      .get("/api/user/lurker")
+      .expect(404)
+      .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
+  });
+  test("status 404: responds with 'No user exists for username: :username'", () => {
+    return request(app)
+      .get("/api/users/1amJonSn0w")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("No user exists for username: 1amJonSn0w");
+      });
+  });
+});
