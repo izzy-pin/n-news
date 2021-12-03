@@ -116,6 +116,13 @@ describe("/api/articles/:article_id", () => {
               comment_count: "2",
             })
           );
+        })
+        .then(() => {
+          return db
+            .query(`SELECT votes FROM articles WHERE article_id=3;`)
+            .then(({ rows }) => {
+              expect(rows[0].votes).toBe(1);
+            });
         });
     });
     test("status 200: responds with the updated article where votes is a -ve num", () => {
@@ -136,6 +143,13 @@ describe("/api/articles/:article_id", () => {
               comment_count: "2",
             })
           );
+        })
+        .then(() => {
+          return db
+            .query(`SELECT votes FROM articles WHERE article_id=3;`)
+            .then(({ rows }) => {
+              expect(rows[0].votes).toBe(-100);
+            });
         });
     });
     test("status 200: responds with updated article if votes is a num and ignores any extra info on the request object", () => {
@@ -156,15 +170,28 @@ describe("/api/articles/:article_id", () => {
               comment_count: "2",
             })
           );
+        })
+        .then(() => {
+          return db
+            .query(`SELECT votes FROM articles WHERE article_id=3;`)
+            .then(({ rows }) => {
+              expect(rows[0].votes).toBe(-100);
+            });
         });
     });
     test("status 404: responds with 'Path not found'", () => {
       return request(app)
-        .patch("/api/arts/2")
+        .patch("/api/arts/1")
         .send({ inc_votes: -100 })
         .expect(404)
-        .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
-      // do a SELECT statement here to check votes hasn't been updated?
+        .then(({ body: { msg } }) => expect(msg).toBe("Path not found"))
+        .then(() => {
+          return db
+            .query(`SELECT votes FROM articles WHERE article_id=1;`)
+            .then(({ rows }) => {
+              expect(rows[0].votes).toBe(100);
+            });
+        });
     });
     test("status 404: responds with 'No article found for article_id: :article_id, cannot update votes'", () => {
       return request(app)
@@ -188,11 +215,18 @@ describe("/api/articles/:article_id", () => {
     });
     test("status 400: responds with 'Bad request' when inc_votes invalid datatype", () => {
       return request(app)
-        .patch("/api/articles/3")
+        .patch("/api/articles/1")
         .send({ inc_votes: "banana" })
         .expect(400)
         .then(({ body: { msg } }) => {
           expect(msg).toBe("Bad request");
+        })
+        .then(() => {
+          return db
+            .query(`SELECT votes FROM articles WHERE article_id=1;`)
+            .then(({ rows }) => {
+              expect(rows[0].votes).toBe(100);
+            });
         });
     });
     test("status 400: responds with 'Bad request, must have inc_votes' when object on body doesn't include inc_votes", () => {
@@ -202,6 +236,13 @@ describe("/api/articles/:article_id", () => {
         .expect(400)
         .then(({ body: { msg } }) => {
           expect(msg).toBe("Bad request, must have inc_votes");
+        })
+        .then(() => {
+          return db
+            .query(`SELECT votes FROM articles WHERE article_id=3;`)
+            .then(({ rows }) => {
+              expect(rows[0].votes).toBe(0);
+            });
         });
     });
   });
@@ -466,6 +507,13 @@ describe("/api/articles/:article_id/comments", () => {
               body: "love this article!",
             })
           );
+        })
+        .then(() => {
+          return db
+            .query(`SELECT * FROM comments WHERE article_id=5;`)
+            .then(({ rows }) => {
+              expect(rows.length).toBe(3);
+            });
         });
     });
     test("status 201, responds with the posted comment for an article with no comments", () => {
@@ -507,8 +555,14 @@ describe("/api/articles/:article_id/comments", () => {
         .post("/api/articles/2/comms")
         .send({ username: "butter_bridge", body: "love this article!" })
         .expect(404)
-        .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
-      // do a SELECT statement here to check comment hasn't been added?
+        .then(({ body: { msg } }) => expect(msg).toBe("Path not found"))
+        .then(() => {
+          return db
+            .query(`SELECT exists(SELECT 1 FROM comments where article_id=2);`)
+            .then(({ rows }) => {
+              expect(rows[0].exists).toBe(false);
+            });
+        });
     });
     test("status 404: responds with 'No article found for article_id: :article_id, cannot update votes'", () => {
       return request(app)
@@ -517,6 +571,15 @@ describe("/api/articles/:article_id/comments", () => {
         .expect(404)
         .then(({ body: { msg } }) => {
           expect(msg).toBe("No article found for article_id: 2607");
+        })
+        .then(() => {
+          return db
+            .query(
+              `SELECT exists(SELECT 1 FROM comments where article_id=2607);`
+            )
+            .then(({ rows }) => {
+              expect(rows[0].exists).toBe(false);
+            });
         });
     });
     test("status 400: responds with 'Bad request' when article_id is incorrect dt", () => {
@@ -535,6 +598,13 @@ describe("/api/articles/:article_id/comments", () => {
         .expect(400)
         .then(({ body: { msg } }) => {
           expect(msg).toBe("Bad request, must include a comment");
+        })
+        .then(() => {
+          return db
+            .query(`SELECT exists(SELECT 1 FROM comments where article_id=2);`)
+            .then(({ rows }) => {
+              expect(rows[0].exists).toBe(false);
+            });
         });
     });
     test("status 400: responds with 'Bad request, must include a comment' when object on body when body is an empty string", () => {
@@ -544,6 +614,15 @@ describe("/api/articles/:article_id/comments", () => {
         .expect(400)
         .then(({ body: { msg } }) => {
           expect(msg).toBe("Bad request, must include a comment");
+        })
+        .then(() => {
+          return db
+            .query(
+              `SELECT exists(SELECT 1 FROM comments where article_id=2607);`
+            )
+            .then(({ rows }) => {
+              expect(rows[0].exists).toBe(false);
+            });
         });
     });
     test("status 400: responds with 'Bad request, must have a username' when no username given", () => {
@@ -553,6 +632,15 @@ describe("/api/articles/:article_id/comments", () => {
         .expect(400)
         .then(({ body: { msg } }) => {
           expect(msg).toBe("Bad request, must have a username");
+        })
+        .then(() => {
+          return db
+            .query(
+              `SELECT exists(SELECT 1 FROM comments where article_id=2607);`
+            )
+            .then(({ rows }) => {
+              expect(rows[0].exists).toBe(false);
+            });
         });
     });
   });
