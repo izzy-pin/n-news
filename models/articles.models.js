@@ -61,7 +61,7 @@ exports.selectArticles = (
   sort_by = "created_at",
   order = "desc",
   topic,
-  limit = 10,
+  l = 10,
   p = 0
 ) => {
   if (
@@ -113,16 +113,15 @@ exports.selectArticles = (
 
     return db.query(articlesQueryString).then((results) => {
       const len = results.rows.length;
-      console.log(len);
+
       // calc limit
-      limit = Math.round(limit);
-      if (limit < 0) {
-        limit = 0;
-      }
       const numRegEx = /\D/;
-      const regExp = /[^\d.-]/gi;
-      if (regExp.test(limit)) {
-        limit = 10;
+
+      if (numRegEx.test(l)) {
+        return Promise.reject({
+          status: 400,
+          msg: "Bad request, please enter a positive whole number",
+        });
       }
 
       if (numRegEx.test(p)) {
@@ -132,14 +131,17 @@ exports.selectArticles = (
         });
       }
       // calc p using limit
-      const start = p === 0 || p === 1 ? 0 : (p - 1) * limit;
-      if (len > 0 && p >= len) {
+      const limit = parseInt(l);
+      const page = parseInt(p);
+      const start = page === 0 || page === 1 ? 0 : (page - 1) * limit;
+      if (len > 0 && page >= len) {
         return Promise.reject({
           status: 400,
           msg: "Bad request, page number too high",
         });
       }
-      const end = limit >= len || start + limit >= len ? len : start + limit;
+      const end = limit > len || start + limit > len ? len : start + limit;
+
       return results.rows.slice(start, end);
     });
   });

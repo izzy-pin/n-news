@@ -435,7 +435,7 @@ describe("GET /api/articles", () => {
         .then(({ body: { msg } }) => expect(msg).toBe("Invalid topic query"));
     });
   });
-  describe.only("limit query", () => {
+  describe("limit query", () => {
     test("status 200, defaults to 10 articles, responds with an array of 10 article objects", () => {
       return request(app)
         .get("/api/articles")
@@ -468,53 +468,32 @@ describe("GET /api/articles", () => {
           expect(articles).toHaveLength(12);
         });
     });
-    test("status 200, defaults to 10 articles, when limit given non-numerical chars, responds with an array of 10 article objects", () => {
+    test("status 400, returns 'Bad request, please enter a positive whole number' when given anything other than an int", () => {
       return request(app)
-        .get("/api/articles?limit=1cheese")
-        .expect(200)
-        .then(({ body: { articles } }) => {
-          expect(Array.isArray(articles)).toBe(true);
-          expect(articles).toHaveLength(10);
+        .get("/api/articles?limit=5.3")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request, please enter a positive whole number");
         });
     });
-    test("status 200, 0 articles, when limit given as a negative numerical string", () => {
+    test("status 400, returns 'Bad request, please enter a positive whole number' when given anything other than an int", () => {
       return request(app)
-        .get("/api/articles?limit=-5")
-        .expect(200)
-        .then(({ body: { articles } }) => {
-          expect(Array.isArray(articles)).toBe(true);
-          expect(articles).toHaveLength(0);
+        .get("/api/articles?limit=-53")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request, please enter a positive whole number");
         });
     });
-    test("status 200, when limit is a float gets rounded", () => {
+    test("status 400, returns 'Bad request, please enter a positive whole number' when given anything other than an int", () => {
       return request(app)
-        .get("/api/articles?limit=5.773")
-        .expect(200)
-        .then(({ body: { articles } }) => {
-          expect(Array.isArray(articles)).toBe(true);
-          expect(articles).toHaveLength(6);
-        });
-    });
-    test("status 200, 10 articles, when limit given as a mix of alphanumerical chars", () => {
-      return request(app)
-        .get("/api/articles?limit=!5")
-        .expect(200)
-        .then(({ body: { articles } }) => {
-          expect(Array.isArray(articles)).toBe(true);
-          expect(articles).toHaveLength(10);
-        });
-    });
-    test("status 200, 10 articles, when limit is a mix of numbers + valid  alphanumerical - chars", () => {
-      return request(app)
-        .get("/api/articles?limit=5-7")
-        .expect(200)
-        .then(({ body: { articles } }) => {
-          expect(Array.isArray(articles)).toBe(true);
-          expect(articles).toHaveLength(10);
+        .get("/api/articles?limit=banana")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request, please enter a positive whole number");
         });
     });
   });
-  describe.only("page query", () => {
+  describe("page query", () => {
     test("status 200, p defaults to first page", () => {
       return request(app)
         .get("/api/articles")
