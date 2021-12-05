@@ -61,7 +61,8 @@ exports.selectArticles = (
   sort_by = "created_at",
   order = "desc",
   topic,
-  limit = 10
+  limit = 10,
+  p = 0
 ) => {
   if (
     ![
@@ -95,33 +96,51 @@ exports.selectArticles = (
         }
       });
   }
-
-  return Promise.all([sort_by, order, topic, topicsCheck]).then(
-    ([sort_by, order, topic]) => {
-      let articlesQueryString = `
+  //not sure about this syntax???
+  return Promise.all([topicsCheck]).then(() => {
+    let articlesQueryString = `
   SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, COUNT(comments.article_id) AS comment_count 
   FROM articles 
   LEFT JOIN comments 
   ON comments.article_id = articles.article_id `;
 
-      if (typeof topic === "string") {
-        articlesQueryString += `WHERE articles.topic = '${topic}' `;
-      }
+    if (typeof topic === "string") {
+      articlesQueryString += `WHERE articles.topic = '${topic}' `;
+    }
 
-      articlesQueryString += `GROUP BY articles.article_id
+    articlesQueryString += `GROUP BY articles.article_id
   ORDER BY ${sort_by} ${order};`;
 
-      return db.query(articlesQueryString).then((results) => {
-        limit = Math.round(limit);
-        if (limit < 0) {
-          limit = 0;
-        }
-        const regExp = /[^\d.-]/gi;
-        if (regExp.test(limit)) {
-          limit = 10;
-        }
-        return results.rows.slice(0, limit);
-      });
-    }
-  );
+    return db.query(articlesQueryString).then((results) => {
+      const len = results.rows.length;
+      console.log(len);
+      // calc limit
+      limit = Math.round(limit);
+      if (limit < 0) {
+        limit = 0;
+      }
+      const numRegEx = /\D/;
+      const regExp = /[^\d.-]/gi;
+      if (regExp.test(limit)) {
+        limit = 10;
+      }
+
+      if (numRegEx.test(p)) {
+        return Promise.reject({
+          status: 400,
+          msg: "Bad request, please enter valid page number",
+        });
+      }
+      // calc p using limit
+      const start = p === 0 || p === 1 ? 0 : (p - 1) * limit;
+      if (len > 0 && p >= len) {
+        return Promise.reject({
+          status: 400,
+          msg: "Bad request, page number too high",
+        });
+      }
+      const end = limit >= len || start + limit >= len ? len : start + limit;
+      return results.rows.slice(start, end);
+    });
+  });
 };

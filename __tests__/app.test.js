@@ -419,7 +419,7 @@ describe("GET /api/articles", () => {
           expect(articles).toBeSortedBy("created_at", { descending: true });
         });
     });
-    test("status 200: where query value topic 'paper' exists but not articles have it, return an empty array", () => {
+    test("status 200: where query value topic 'paper' exists but no articles have it, return an empty array", () => {
       return request(app)
         .get("/api/articles?topic=paper")
         .expect(200)
@@ -435,7 +435,7 @@ describe("GET /api/articles", () => {
         .then(({ body: { msg } }) => expect(msg).toBe("Invalid topic query"));
     });
   });
-  describe("limit query", () => {
+  describe.only("limit query", () => {
     test("status 200, defaults to 10 articles, responds with an array of 10 article objects", () => {
       return request(app)
         .get("/api/articles")
@@ -504,7 +504,7 @@ describe("GET /api/articles", () => {
           expect(articles).toHaveLength(10);
         });
     });
-    test("status 200, 10 articles, when limit is a mix of numbers + valid chars e.g. -. chars", () => {
+    test("status 200, 10 articles, when limit is a mix of numbers + valid  alphanumerical - chars", () => {
       return request(app)
         .get("/api/articles?limit=5-7")
         .expect(200)
@@ -514,6 +514,119 @@ describe("GET /api/articles", () => {
         });
     });
   });
+  describe.only("page query", () => {
+    test("status 200, p defaults to first page", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(10);
+          expect(articles[0]).toEqual(
+            expect.objectContaining({
+              article_id: 3,
+              author: "icellusedkars",
+              comment_count: "2",
+              created_at: "2020-11-03T09:12:00.000Z",
+              title: "Eight pug gifs that remind me of mitch",
+              topic: "mitch",
+              votes: 0,
+            })
+          );
+        });
+    });
+    test("status 200, returns array of length 4, elements selected using queries", () => {
+      return request(app)
+        .get("/api/articles?p=2&limit=4")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(4);
+          expect(articles[0]).toEqual(
+            expect.objectContaining({
+              author: "rogersop",
+              title: "UNCOVERED: catspiracy to bring down democracy",
+              article_id: 5,
+              topic: "cats",
+              created_at: "2020-08-03T13:14:00.000Z",
+              votes: 0,
+              comment_count: "2",
+            })
+          );
+          expect(articles[3]).toEqual(
+            expect.objectContaining({
+              author: "rogersop",
+              title: "Seven inspirational thought leaders from Manchester UK",
+              article_id: 10,
+              topic: "mitch",
+              created_at: "2020-05-14T04:15:00.000Z",
+              votes: 0,
+              comment_count: "0",
+            })
+          );
+        });
+    });
+
+    test("status 200, returns array of length 2, last page size is less than limit", () => {
+      return request(app)
+        .get("/api/articles?p=2&limit=10")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(2);
+          expect(articles[0]).toEqual(
+            expect.objectContaining({
+              author: "icellusedkars",
+              title: "Am I a cat?",
+              article_id: 11,
+              topic: "mitch",
+              created_at: "2020-01-15T22:21:00.000Z",
+              votes: 0,
+              comment_count: "0",
+            })
+          );
+          expect(articles[1]).toEqual(
+            expect.objectContaining({
+              author: "icellusedkars",
+              title: "Z",
+              article_id: 7,
+              topic: "mitch",
+              created_at: "2020-01-07T14:08:00.000Z",
+              votes: 0,
+              comment_count: "0",
+            })
+          );
+        });
+    });
+
+    test("status 400, returns 'Bad request, please enter valid page number' when given anything other than an int", () => {
+      return request(app)
+        .get("/api/articles?p=5.3")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request, please enter valid page number");
+        });
+    });
+    test("status 400, returns 'Bad request, page number too high' when p > number of valid articles", () => {
+      return request(app)
+        .get("/api/articles?p=12")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request, page number too high");
+        });
+    });
+    test("status 400, returns 'Bad request, page number too high' when p > number of valid articles", () => {
+      return request(app)
+        .get("/api/articles?p=2&limit=10&topic=cats")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request, page number too high");
+        });
+    });
+  });
+
+  // describe("add a total count properties to articles", () => {
+  // })
 });
 
 describe("/api/articles/:article_id/comments", () => {
