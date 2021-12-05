@@ -2,13 +2,9 @@
 
 ## What's it about?
 
----
-
 \*_coming soon_
 
 ## Find the app hosted on _Heroku_
-
----
 
 View the app [here](https://newsrn.herokuapp.com/api)
 
@@ -16,16 +12,16 @@ View a JSON object of all currently available endpoints [here](https://newsrn.he
 
 ## Setup
 
----
-
 ### Clone:
+
+---
 
 - To copy this repo use
   `git clone https://github.com/izzy-pin/news-rn.git`
 
----
-
 ### Install dependencies:
+
+---
 
 - To install all the dependencies and devDependencies listed in the package.json, run `npm install` in the root directory of your cloned repo.
 
