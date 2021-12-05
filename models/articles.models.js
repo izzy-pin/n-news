@@ -57,7 +57,12 @@ exports.updateArticleByArticleId = (inc_votes, id) => {
     });
 };
 
-exports.selectArticles = (sort_by = "created_at", order = "desc", topic) => {
+exports.selectArticles = (
+  sort_by = "created_at",
+  order = "desc",
+  topic,
+  limit = 10
+) => {
   if (
     ![
       "author",
@@ -106,7 +111,17 @@ exports.selectArticles = (sort_by = "created_at", order = "desc", topic) => {
       articlesQueryString += `GROUP BY articles.article_id
   ORDER BY ${sort_by} ${order};`;
 
-      return db.query(articlesQueryString).then((results) => results.rows);
+      return db.query(articlesQueryString).then((results) => {
+        limit = Math.round(limit);
+        if (limit < 0) {
+          limit = 0;
+        }
+        const regExp = /[^\d.-]/gi;
+        if (regExp.test(limit)) {
+          limit = 10;
+        }
+        return results.rows.slice(0, limit);
+      });
     }
   );
 };

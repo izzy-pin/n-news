@@ -257,7 +257,7 @@ describe("GET /api/articles", () => {
         .expect(200)
         .then(({ body: { articles } }) => {
           expect(Array.isArray(articles)).toBe(true);
-          expect(articles).toHaveLength(12);
+          expect(articles).toHaveLength(10);
           expect(articles).toBeSortedBy("created_at", { descending: true });
           articles.forEach((article) => {
             expect(article).toEqual(
@@ -280,7 +280,7 @@ describe("GET /api/articles", () => {
         .expect(200)
         .then(({ body: { articles } }) => {
           expect(Array.isArray(articles)).toBe(true);
-          expect(articles).toHaveLength(12);
+          expect(articles).toHaveLength(10);
           expect(articles).toBeSortedBy("article_id", { descending: true });
         });
     });
@@ -290,7 +290,7 @@ describe("GET /api/articles", () => {
         .expect(200)
         .then(({ body: { articles } }) => {
           expect(Array.isArray(articles)).toBe(true);
-          expect(articles).toHaveLength(12);
+          expect(articles).toHaveLength(10);
           expect(articles).toBeSortedBy("author", { descending: true });
         });
     });
@@ -300,7 +300,7 @@ describe("GET /api/articles", () => {
         .expect(200)
         .then(({ body: { articles } }) => {
           expect(Array.isArray(articles)).toBe(true);
-          expect(articles).toHaveLength(12);
+          expect(articles).toHaveLength(10);
           expect(articles).toBeSortedBy("title", { descending: true });
         });
     });
@@ -310,7 +310,7 @@ describe("GET /api/articles", () => {
         .expect(200)
         .then(({ body: { articles } }) => {
           expect(Array.isArray(articles)).toBe(true);
-          expect(articles).toHaveLength(12);
+          expect(articles).toHaveLength(10);
           expect(articles).toBeSortedBy("topic", { descending: true });
         });
     });
@@ -320,7 +320,7 @@ describe("GET /api/articles", () => {
         .expect(200)
         .then(({ body: { articles } }) => {
           expect(Array.isArray(articles)).toBe(true);
-          expect(articles).toHaveLength(12);
+          expect(articles).toHaveLength(10);
           expect(articles).toBeSortedBy("votes", { descending: true });
         });
     });
@@ -330,7 +330,7 @@ describe("GET /api/articles", () => {
         .expect(200)
         .then(({ body: { articles } }) => {
           expect(Array.isArray(articles)).toBe(true);
-          expect(articles).toHaveLength(12);
+          expect(articles).toHaveLength(10);
           expect(articles).toBeSortedBy("comment_count", {
             descending: true,
             coerce: true,
@@ -343,7 +343,7 @@ describe("GET /api/articles", () => {
         .expect(200)
         .then(({ body: { articles } }) => {
           expect(Array.isArray(articles)).toBe(true);
-          expect(articles).toHaveLength(12);
+          expect(articles).toHaveLength(10);
           expect(articles).toBeSortedBy("created_at", { descending: true });
         });
     });
@@ -367,7 +367,7 @@ describe("GET /api/articles", () => {
         .expect(200)
         .then(({ body: { articles } }) => {
           expect(Array.isArray(articles)).toBe(true);
-          expect(articles).toHaveLength(12);
+          expect(articles).toHaveLength(10);
           expect(articles).toBeSortedBy("created_at", { descending: true });
         });
     });
@@ -377,7 +377,7 @@ describe("GET /api/articles", () => {
         .expect(200)
         .then(({ body: { articles } }) => {
           expect(Array.isArray(articles)).toBe(true);
-          expect(articles).toHaveLength(12);
+          expect(articles).toHaveLength(10);
           expect(articles).toBeSortedBy("created_at", { descending: true });
         });
     });
@@ -387,7 +387,7 @@ describe("GET /api/articles", () => {
         .expect(200)
         .then(({ body: { articles } }) => {
           expect(Array.isArray(articles)).toBe(true);
-          expect(articles).toHaveLength(12);
+          expect(articles).toHaveLength(10);
           expect(articles).toBeSortedBy("created_at");
         });
     });
@@ -405,7 +405,7 @@ describe("GET /api/articles", () => {
         .expect(200)
         .then(({ body: { articles } }) => {
           expect(Array.isArray(articles)).toBe(true);
-          expect(articles).toHaveLength(11);
+          expect(articles).toHaveLength(10);
           expect(articles).toBeSortedBy("created_at", { descending: true });
         });
     });
@@ -433,6 +433,85 @@ describe("GET /api/articles", () => {
         .get("/api/articles?topic=lawnmowers")
         .expect(400)
         .then(({ body: { msg } }) => expect(msg).toBe("Invalid topic query"));
+    });
+  });
+  describe("limit query", () => {
+    test("status 200, defaults to 10 articles, responds with an array of 10 article objects", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(10);
+        });
+    });
+    test("status 200, returns array of articles, the amount equal to limit", () => {
+      return request(app)
+        .get("/api/articles?limit=8")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(8);
+        })
+        .then(() => {
+          return db.query(`SELECT * FROM articles;`).then(({ rows }) => {
+            expect(rows.length).toBe(12);
+          });
+        });
+    });
+    test("status 200, returns array of all articles, when limit > the number of articles", () => {
+      return request(app)
+        .get("/api/articles?limit=200")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(12);
+        });
+    });
+    test("status 200, defaults to 10 articles, when limit given non-numerical chars, responds with an array of 10 article objects", () => {
+      return request(app)
+        .get("/api/articles?limit=1cheese")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(10);
+        });
+    });
+    test("status 200, 0 articles, when limit given as a negative numerical string", () => {
+      return request(app)
+        .get("/api/articles?limit=-5")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(0);
+        });
+    });
+    test("status 200, when limit is a float gets rounded", () => {
+      return request(app)
+        .get("/api/articles?limit=5.773")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(6);
+        });
+    });
+    test("status 200, 10 articles, when limit given as a mix of alphanumerical chars", () => {
+      return request(app)
+        .get("/api/articles?limit=!5")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(10);
+        });
+    });
+    test("status 200, 10 articles, when limit is a mix of numbers + valid chars e.g. -. chars", () => {
+      return request(app)
+        .get("/api/articles?limit=5-7")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(10);
+        });
     });
   });
 });
