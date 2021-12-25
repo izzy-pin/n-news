@@ -428,11 +428,11 @@ describe("GET /api/articles", () => {
           expect(articles).toHaveLength(0);
         });
     });
-    test("status 400: responds with 'Invalid topic query'", () => {
+    test("status 404: responds with 'Invalid topic query'", () => {
       return request(app)
         .get("/api/articles?topic=lawnmowers")
-        .expect(400)
-        .then(({ body: { msg } }) => expect(msg).toBe("Invalid topic query"));
+        .expect(404)
+        .then(({ body: { msg } }) => expect(msg).toBe("Topic doesn't exist"));
     });
   });
   describe("limit query", () => {
@@ -604,8 +604,19 @@ describe("GET /api/articles", () => {
     });
   });
 
-  // describe("add a total count properties to articles", () => {
-  // })
+  describe("add a total count properties to articles", () => {
+    test("status 200: articles has a total count  property", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          console.log(body);
+          expect(Array.isArray(body.articles)).toBe(true);
+          expect(body.articles).toHaveLength(10);
+          expect(body.total_count).toBe(12);
+        });
+    });
+  });
 });
 
 describe("/api/articles/:article_id/comments", () => {

@@ -92,11 +92,12 @@ exports.selectArticles = (
       .then((results) => {
         const validTopics = results.rows[0].topics;
         if (!validTopics.includes(topic)) {
-          return Promise.reject({ status: 400, msg: "Invalid topic query" });
+          return Promise.reject({ status: 404, msg: "Topic doesn't exist" });
         }
       });
   }
   //not sure about this syntax???
+  // pagination to do!!
   return Promise.all([topicsCheck]).then(() => {
     let articlesQueryString = `
   SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, COUNT(comments.article_id) AS comment_count 
@@ -141,8 +142,8 @@ exports.selectArticles = (
         });
       }
       const end = limit > len || start + limit > len ? len : start + limit;
-
-      return results.rows.slice(start, end);
+      const articles = results.rows.slice(start, end);
+      return { articles, total_count: len };
     });
   });
 };
