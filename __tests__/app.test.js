@@ -610,7 +610,6 @@ describe("GET /api/articles", () => {
         .get("/api/articles")
         .expect(200)
         .then(({ body }) => {
-          console.log(body);
           expect(Array.isArray(body.articles)).toBe(true);
           expect(body.articles).toHaveLength(10);
           expect(body.total_count).toBe(12);
@@ -733,6 +732,7 @@ describe("/api/articles/:article_id/comments", () => {
           );
         });
     });
+    // test 201 ignores unnecessary properties
     test("status 404: responds with 'Path not found'", () => {
       return request(app)
         .post("/api/articles/2/comms")
@@ -765,7 +765,8 @@ describe("/api/articles/:article_id/comments", () => {
             });
         });
     });
-    test("status 400: responds with 'Bad request' when article_id is incorrect dt", () => {
+    // test 404 username does not exist
+    test("status 400: responds with 'Bad request' when article_id is incorrect datatype", () => {
       return request(app)
         .post("/api/articles/not_an_id/comments")
         .send({ username: "butter_bridge", body: "love this article!" })
@@ -861,6 +862,23 @@ describe("DELETE /api/comments/:comment_id", () => {
       .expect(404)
       .then(({ body: { msg } }) => {
         expect(msg).toBe("No comment found for comment_id: 2607");
+      });
+  });
+
+  test("status 400: 'Bad request'", () => {
+    return request(app)
+      .delete("/api/comments/not-an-id")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
+      });
+  });
+  test("status 400: 'Bad request'", () => {
+    return request(app)
+      .delete("/api/comments/3.2")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request");
       });
   });
 });
