@@ -7,6 +7,7 @@ const {
   updateCommentByCommentId,
   selectCommentByCommentId,
 } = require("../models/comments.models");
+const { checkUsernameExists } = require("../models/users.models");
 
 exports.getCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
@@ -25,7 +26,14 @@ exports.getCommentsByArticleId = (req, res, next) => {
 exports.postCommentForArticleId = (req, res, next) => {
   const { username, body } = req.body;
   const { article_id } = req.params;
-  Promise.all([username, body, article_id, checkArticleExists(article_id)])
+  Promise.all([
+    username,
+    body,
+    article_id,
+    ,
+    checkUsernameExists(username),
+    checkArticleExists(article_id),
+  ])
     .then(([username, body, article_id]) => {
       return insertCommentForArticleId(username, body, article_id);
     })

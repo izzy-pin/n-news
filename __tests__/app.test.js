@@ -732,7 +732,29 @@ describe("/api/articles/:article_id/comments", () => {
           );
         });
     });
-    // test 201 ignores unnecessary properties
+    test("status 201, ignores unnecessary properties + responds with the posted comment", () => {
+      return request(app)
+        .post("/api/articles/2/comments")
+        .send({
+          username: "butter_bridge",
+          body: "love this article!",
+          fruit: "banana",
+        })
+        .expect(201)
+        .then(({ body: { comment } }) => {
+          expect(comment).toEqual(
+            expect.objectContaining({
+              comment_id: 19,
+              votes: 0,
+              created_at: expect.any(String),
+              author: "butter_bridge",
+              body: "love this article!",
+            })
+          );
+          expect(comment).not.toHaveProperty("fruit", "banana");
+        });
+    });
+
     test("status 404: responds with 'Path not found'", () => {
       return request(app)
         .post("/api/articles/2/comms")
@@ -766,6 +788,15 @@ describe("/api/articles/:article_id/comments", () => {
         });
     });
     // test 404 username does not exist
+    test("status 404: responds with 'username does not exist'", () => {
+      return request(app)
+        .post("/api/articles/2/comments")
+        .send({ username: "nonexistent-user", body: "love this article!" })
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("No user exists for username: nonexistent-user");
+        });
+    });
     test("status 400: responds with 'Bad request' when article_id is incorrect datatype", () => {
       return request(app)
         .post("/api/articles/not_an_id/comments")

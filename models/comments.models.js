@@ -39,13 +39,6 @@ exports.insertCommentForArticleId = (username, body, id) => {
     });
   }
 
-  if (!username) {
-    return Promise.reject({
-      status: 400,
-      msg: `Bad request, must have a username`,
-    });
-  }
-
   return db
     .query(
       `
