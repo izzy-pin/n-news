@@ -525,7 +525,7 @@ describe("GET /api/articles", () => {
             article_id: 5,
             author: "rogersop",
             comment_count: "2",
-            created_at: "2020-08-03T13:14:00.000Z",
+            created_at: "2020-08-03T14:14:00.000Z",
             title: "UNCOVERED: catspiracy to bring down democracy",
             topic: "cats",
             total_count: 12,
