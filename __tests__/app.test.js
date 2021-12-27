@@ -523,24 +523,26 @@ describe("GET /api/articles", () => {
           expect(articles).toHaveLength(4);
           expect(articles[0]).toEqual(
             expect.objectContaining({
-              author: "rogersop",
-              title: "UNCOVERED: catspiracy to bring down democracy",
               article_id: 5,
-              topic: "cats",
-              created_at: "2020-08-03T13:14:00.000Z",
-              votes: 0,
+              author: "rogersop",
               comment_count: "2",
+              created_at: "2020-08-03T13:14:00.000Z",
+              title: "UNCOVERED: catspiracy to bring down democracy",
+              topic: "cats",
+              total_count: 12,
+              votes: 0,
             })
           );
           expect(articles[3]).toEqual(
             expect.objectContaining({
-              author: "rogersop",
-              title: "Seven inspirational thought leaders from Manchester UK",
               article_id: 10,
-              topic: "mitch",
-              created_at: "2020-05-14T04:15:00.000Z",
-              votes: 0,
+              author: "rogersop",
               comment_count: "0",
+              created_at: "2020-05-14T04:15:00.000Z",
+              title: "Seven inspirational thought leaders from Manchester UK",
+              topic: "mitch",
+              total_count: 12,
+              votes: 0,
             })
           );
         });
