@@ -693,6 +693,62 @@ describe("/api/articles/:article_id/comments", () => {
           expect(msg).toBe("Bad request");
         });
     });
+    describe("p and limit query", () => {
+      test("status 200, returns array of length 3, using pagination queries", () => {
+        return request(app)
+          .get("/api/articles/1/comments?p=3&limit=4")
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(Array.isArray(comments)).toBe(true);
+            expect(comments).toHaveLength(3);
+            comments.forEach((comment) => {
+              expect(comment).toEqual(
+                expect.objectContaining({
+                  comment_id: expect.any(Number),
+                  votes: expect.any(Number),
+                  created_at: expect.any(String),
+                  author: expect.any(String),
+                  body: expect.any(String),
+                })
+              );
+            });
+          });
+      });
+      test("status 200, returns array of length 10, with/out queries, default values used", () => {
+        return request(app)
+          .get("/api/articles/1/comments")
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(Array.isArray(comments)).toBe(true);
+            expect(comments).toHaveLength(10);
+            expect(comments[0]).toEqual(
+              expect.objectContaining({
+                comment_id: 2,
+                votes: 14,
+                created_at: expect.any(String),
+                author: "butter_bridge",
+                body: expect.any(String),
+              })
+            );
+          });
+      });
+      test("status 400, returns 'Bad request, please enter valid page number' when given anything other than an int", () => {
+        return request(app)
+          .get("/api/articles/1/comments?p=5.3")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("Bad request, please enter valid page number");
+          });
+      });
+      test("status 400, returns 'Bad request, please enter a valid limit' when given anything other than an int", () => {
+        return request(app)
+          .get("/api/articles/1/comments?limit=5.3")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("Bad request, please enter a valid limit");
+          });
+      });
+    });
   });
 
   describe("POST /api/articles/:article_id/comments", () => {

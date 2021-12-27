@@ -17,14 +17,34 @@ exports.checkCommentExists = (id) => {
     });
 };
 
-exports.selectCommentsByArticleId = (id) => {
+exports.selectCommentsByArticleId = (id, p = 0, limit = 10) => {
+  const numRegEx = /\D/;
+
+  if (numRegEx.test(limit)) {
+    return Promise.reject({
+      status: 400,
+      msg: "Bad request, please enter a valid limit",
+    });
+  }
+
+  if (numRegEx.test(p)) {
+    return Promise.reject({
+      status: 400,
+      msg: "Bad request, please enter valid page number",
+    });
+  }
+
+  const start = p === 0 || p === 1 ? 0 : (p - 1) * limit;
+
   return db
     .query(
       `SELECT comment_id, votes, created_at, body, author 
         FROM comments 
         WHERE article_id = $1
-        GROUP BY comment_id;`,
-      [id]
+        GROUP BY comment_id
+        LIMIT $2 OFFSET $3
+        ;`,
+      [id, limit, start]
     )
     .then((results) => {
       return results.rows;
