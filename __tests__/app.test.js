@@ -521,30 +521,26 @@ describe("GET /api/articles", () => {
         .then(({ body: { articles } }) => {
           expect(Array.isArray(articles)).toBe(true);
           expect(articles).toHaveLength(4);
-          expect(articles[0]).toEqual(
-            expect.objectContaining({
-              article_id: 5,
-              author: "rogersop",
-              comment_count: "2",
-              created_at: "2020-08-03T13:14:00.000Z",
-              title: "UNCOVERED: catspiracy to bring down democracy",
-              topic: "cats",
-              total_count: 12,
-              votes: 0,
-            })
-          );
-          expect(articles[3]).toEqual(
-            expect.objectContaining({
-              article_id: 10,
-              author: "rogersop",
-              comment_count: "0",
-              created_at: "2020-05-14T04:15:00.000Z",
-              title: "Seven inspirational thought leaders from Manchester UK",
-              topic: "mitch",
-              total_count: 12,
-              votes: 0,
-            })
-          );
+          expect(articles[0]).toMatchObject({
+            article_id: 5,
+            author: "rogersop",
+            comment_count: "2",
+            created_at: "2020-08-03T13:14:00.000Z",
+            title: "UNCOVERED: catspiracy to bring down democracy",
+            topic: "cats",
+            total_count: 12,
+            votes: 0,
+          });
+          expect(articles[3]).toMatchObject({
+            article_id: 10,
+            author: "rogersop",
+            comment_count: "0",
+            created_at: "2020-05-14T04:15:00.000Z",
+            title: "Seven inspirational thought leaders from Manchester UK",
+            topic: "mitch",
+            total_count: 12,
+            votes: 0,
+          });
         });
     });
 
