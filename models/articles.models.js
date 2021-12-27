@@ -96,11 +96,10 @@ exports.selectArticles = (
         }
       });
   }
-  //not sure about this syntax???
-  // pagination to do!!
+
   return Promise.all([topicsCheck]).then(() => {
     let articlesQueryString = `
-  SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, COUNT(comments.article_id) AS comment_count 
+  SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, COUNT(comments.article_id) AS comment_count, COUNT(*) OVER ()::int AS total_count 
   FROM articles 
   LEFT JOIN comments 
   ON comments.article_id = articles.article_id `;
@@ -110,40 +109,32 @@ exports.selectArticles = (
     }
 
     articlesQueryString += `GROUP BY articles.article_id
-  ORDER BY ${sort_by} ${order};`;
+  ORDER BY ${sort_by} ${order} `;
+
+    const numRegEx = /\D/;
+
+    if (numRegEx.test(l)) {
+      return Promise.reject({
+        status: 400,
+        msg: "Bad request, please enter a valid limit",
+      });
+    }
+
+    if (numRegEx.test(p)) {
+      return Promise.reject({
+        status: 400,
+        msg: "Bad request, please enter valid page number",
+      });
+    }
+
+    const limit = parseInt(l);
+    const page = parseInt(p);
+    const start = page === 0 || page === 1 ? 0 : (page - 1) * limit;
+
+    articlesQueryString += `LIMIT ${limit} OFFSET ${start};`;
 
     return db.query(articlesQueryString).then((results) => {
-      const len = results.rows.length;
-
-      // calc limit
-      const numRegEx = /\D/;
-
-      if (numRegEx.test(l)) {
-        return Promise.reject({
-          status: 400,
-          msg: "Bad request, please enter a positive whole number",
-        });
-      }
-
-      if (numRegEx.test(p)) {
-        return Promise.reject({
-          status: 400,
-          msg: "Bad request, please enter valid page number",
-        });
-      }
-      // calc p using limit
-      const limit = parseInt(l);
-      const page = parseInt(p);
-      const start = page === 0 || page === 1 ? 0 : (page - 1) * limit;
-      if (len > 0 && page >= len) {
-        return Promise.reject({
-          status: 400,
-          msg: "Bad request, page number too high",
-        });
-      }
-      const end = limit > len || start + limit > len ? len : start + limit;
-      const articles = results.rows.slice(start, end);
-      return { articles, total_count: len };
+      return { articles: results.rows };
     });
   });
 };

@@ -468,28 +468,28 @@ describe("GET /api/articles", () => {
           expect(articles).toHaveLength(12);
         });
     });
-    test("status 400, returns 'Bad request, please enter a positive whole number' when given anything other than an int", () => {
+    test("status 400, returns 'Bad request, please enter a valid limit' when given anything other than an int", () => {
       return request(app)
         .get("/api/articles?limit=5.3")
         .expect(400)
         .then(({ body: { msg } }) => {
-          expect(msg).toBe("Bad request, please enter a positive whole number");
+          expect(msg).toBe("Bad request, please enter a valid limit");
         });
     });
-    test("status 400, returns 'Bad request, please enter a positive whole number' when given anything other than an int", () => {
+    test("status 400, returns 'Bad request, please enter a valid limit' when given anything other than an int", () => {
       return request(app)
         .get("/api/articles?limit=-53")
         .expect(400)
         .then(({ body: { msg } }) => {
-          expect(msg).toBe("Bad request, please enter a positive whole number");
+          expect(msg).toBe("Bad request, please enter a valid limit");
         });
     });
-    test("status 400, returns 'Bad request, please enter a positive whole number' when given anything other than an int", () => {
+    test("status 400, returns 'Bad request, please enter a valid limit' when given anything other than an int", () => {
       return request(app)
         .get("/api/articles?limit=banana")
         .expect(400)
         .then(({ body: { msg } }) => {
-          expect(msg).toBe("Bad request, please enter a positive whole number");
+          expect(msg).toBe("Bad request, please enter a valid limit");
         });
     });
   });
@@ -577,6 +577,26 @@ describe("GET /api/articles", () => {
           );
         });
     });
+    test("status 200, only page query, no limit provided returns array of length 2", () => {
+      return request(app)
+        .get("/api/articles?p=2")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(2);
+          expect(articles[0]).toEqual(
+            expect.objectContaining({
+              author: "icellusedkars",
+              title: "Am I a cat?",
+              article_id: 11,
+              topic: "mitch",
+              created_at: "2020-01-15T22:21:00.000Z",
+              votes: 0,
+              comment_count: "0",
+            })
+          );
+        });
+    });
 
     test("status 400, returns 'Bad request, please enter valid page number' when given anything other than an int", () => {
       return request(app)
@@ -584,22 +604,6 @@ describe("GET /api/articles", () => {
         .expect(400)
         .then(({ body: { msg } }) => {
           expect(msg).toBe("Bad request, please enter valid page number");
-        });
-    });
-    test("status 400, returns 'Bad request, page number too high' when p > number of valid articles", () => {
-      return request(app)
-        .get("/api/articles?p=12")
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).toBe("Bad request, page number too high");
-        });
-    });
-    test("status 400, returns 'Bad request, page number too high' when p > number of valid articles", () => {
-      return request(app)
-        .get("/api/articles?p=2&limit=10&topic=cats")
-        .expect(400)
-        .then(({ body: { msg } }) => {
-          expect(msg).toBe("Bad request, page number too high");
         });
     });
   });
@@ -612,7 +616,27 @@ describe("GET /api/articles", () => {
         .then(({ body }) => {
           expect(Array.isArray(body.articles)).toBe(true);
           expect(body.articles).toHaveLength(10);
-          expect(body.total_count).toBe(12);
+          expect(body.articles[0].total_count).toBe(12);
+        });
+    });
+    test("status 200, page 2 of 12 results is array of 2, total_count is 12", () => {
+      return request(app)
+        .get("/api/articles?p=2&limit=10")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(2);
+          expect(articles[0]).toHaveProperty("total_count", 12);
+        });
+    });
+    test("status 200:  query search with topic 'mitch', page and limit", () => {
+      return request(app)
+        .get("/api/articles?topic=mitch&p=1&limit=4")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(4);
+          expect(articles[0]).toHaveProperty("total_count", 11);
         });
     });
   });
@@ -787,7 +811,6 @@ describe("/api/articles/:article_id/comments", () => {
             });
         });
     });
-    // test 404 username does not exist
     test("status 404: responds with 'username does not exist'", () => {
       return request(app)
         .post("/api/articles/2/comments")
