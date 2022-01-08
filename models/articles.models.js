@@ -61,7 +61,7 @@ exports.selectArticles = (
   sort_by = "created_at",
   order = "desc",
   topic,
-  l = 10,
+  limit = 10,
   p = 0
 ) => {
   if (
@@ -113,7 +113,7 @@ exports.selectArticles = (
 
     const numRegEx = /\D/;
 
-    if (numRegEx.test(l)) {
+    if (numRegEx.test(limit)) {
       return Promise.reject({
         status: 400,
         msg: "Bad request, please enter a valid limit",
@@ -127,9 +127,7 @@ exports.selectArticles = (
       });
     }
 
-    const limit = parseInt(l);
-    const page = parseInt(p);
-    const start = page === 0 || page === 1 ? 0 : (page - 1) * limit;
+    const start = p === 0 || p === 1 ? 0 : (p - 1) * limit;
 
     articlesQueryString += `LIMIT ${limit} OFFSET ${start};`;
 
