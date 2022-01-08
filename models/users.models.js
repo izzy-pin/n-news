@@ -11,12 +11,12 @@ exports.checkUsernameExists = (username) => {
   return db
     .query(
       `
-SELECT username FROM users;
-`
+SELECT username FROM users WHERE username = $1;
+`,
+      [username]
     )
     .then(({ rows }) => {
-      const validUsers = rows.map((user) => user.username);
-      if (!validUsers.includes(username)) {
+      if (rows.length === 0) {
         return Promise.reject({
           status: 404,
           msg: `No user exists for username: ${username}`,
@@ -36,16 +36,6 @@ exports.selectUsers = () => {
 };
 
 exports.selectUserByUsername = (username) => {
-  // delete this clause in a min!
-  if (
-    !["butter_bridge", "icellusedkars", "rogersop", "lurker"].includes(username)
-  ) {
-    return Promise.reject({
-      status: 404,
-      msg: `No user exists for username: ${username}`,
-    });
-  }
-
   return db
     .query(
       `
@@ -53,5 +43,14 @@ exports.selectUserByUsername = (username) => {
     `,
       [username]
     )
-    .then((result) => result.rows[0]);
+    .then((result) => {
+      if (result.rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          msg: `No user exists for username: ${username}`,
+        });
+      } else {
+        return result.rows[0];
+      }
+    });
 };
