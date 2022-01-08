@@ -10,8 +10,15 @@
     }
   },
   "GET /api/articles": {
-    "description": "serves an array of all articles (newest to oldest), or all articles matching one or multiple queries: topic - filters articles by a valid topic slug, sort_by - sorts articles by valid article key and will default to date unless given an additional order query and order - asc orders articles in alphabetical order (if sorting by author, title, body or topic) or numerical lowest to highest (for article_id, votes and comment_count, in the case of created_at this means oldest to newest) or desc, which therefore sorts articles in reverse alphabetical and numerical order and for created_at means newest to oldest, order will default to descending",
-    "queries": ["topic", "sort_by", "order"],
+    "description": "serves an array of all articles (newest to oldest), or all articles matching one or multiple queries",
+    "queries": ["topic", "sort_by", "order", "p", "limit"],
+    "queryDescriptions": {
+      "topic": "filters articles by a valid topic slug",
+      "sort_by": "sorts articles by valid article key and will default to date unless given an additional order query",
+      "order": "asc orders articles alphabetically (if sort_by set to author, title, body or topic) or numerically lowest to highest (for article_id, votes, comment_count and created_at - meaning articles and comments are shown oldest to newest), desc sorts articles in reverse alphabetical or numerical order and order will default to descending",
+      "p": "specify page number of responses to display",
+      "limit": "specficy how many responses per page"
+    },
     "exampleResponse": {
       "articles": [
         {
@@ -22,7 +29,8 @@
           "topic": "cooking",
           "created_at": 1527695953341,
           "votes": 0,
-          "comment_count": 3
+          "comment_count": 3,
+          "total_count": 15
         }
       ]
     }
@@ -64,7 +72,11 @@
   },
   "GET /api/articles/:article_id/comments": {
     "description": "serves an array of all the comments for an article",
-    "queries": [],
+    "queries": ["p", "limit"],
+    "queryDescriptions": {
+      "p": "specify page number of responses to display",
+      "limit": "specify how many responses per page"
+    },
     "parameter": "a valid article_id number",
     "exampleResponse": {
       "comments": {
@@ -95,9 +107,44 @@
       }
     }
   },
+  "PATCH /api/comments/:comment_id": {
+    "description": "updates the vote count for an comment when path includes a valid comment_id and the request body object has a value of a negative or positive integer, it responds with the updated comment object",
+    "queries": [],
+    "parameter": "a valid comment_id number",
+    "request body": { "inc_votes": "newVote" },
+    "exampleResponse": {
+      "comment": {
+        "comment_id": 14,
+        "author": "weegembump",
+        "article_id": 1,
+        "body": "Text from the article..",
+        "created_at": 1527695953341,
+        "votes": 2
+      }
+    }
+  },
   "DELETE /api/comments/:comment_id": {
     "description": "deletes a comment when given a valid comment_id, it has no response",
     "queries": [],
     "parameter": "a valid comment_id number"
+  },
+  "GET /api/users": {
+    "description": "serves an array of all usernames as individual objects",
+    "queries": [],
+    "exampleResponse": {
+      "topics": [{ "username": "lurker" }]
+    }
+  },
+  "GET /api/users/:username": {
+    "description": "serves a user object for a valid username",
+    "queries": [],
+    "parameter": "a valid article_id number",
+    "exampleResponse": {
+      "user": {
+        "username": "icellusedkars",
+        "name": "sam",
+        "avatar_url": "https://avatars2.githubusercontent.com/u/24604688?s=460&v=4"
+      }
+    }
   }
 }
