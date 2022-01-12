@@ -6,9 +6,7 @@
 
 ## Find the app hosted on _Heroku_
 
-View the app [here](https://newsrn.herokuapp.com/api)
-
-View a JSON object of all currently available endpoints [here](https://newsrn.herokuapp.com/api)
+View all currently available endpoints [here](https://newsrn.herokuapp.com/api)
 
 ## Setup
 
