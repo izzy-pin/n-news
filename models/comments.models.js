@@ -42,6 +42,7 @@ exports.selectCommentsByArticleId = (id, p = 0, limit = 10) => {
         FROM comments 
         WHERE article_id = $1
         GROUP BY comment_id
+        ORDER BY created_at desc
         LIMIT $2 OFFSET $3
         ;`,
       [id, limit, start]

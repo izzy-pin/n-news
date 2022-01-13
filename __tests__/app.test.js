@@ -642,24 +642,23 @@ describe("GET /api/articles", () => {
 
 describe("/api/articles/:article_id/comments", () => {
   describe("GET /api/articles/:article_id/comments", () => {
-    test("status 200: responds with object comments: array of comments of the given article_id", () => {
+    test("status 200: responds with object comments: array of comments of the given article_id, newest first", () => {
       return request(app)
         .get("/api/articles/5/comments")
         .expect(200)
         .then(({ body: { comments } }) => {
           expect(Array.isArray(comments)).toBe(true);
           expect(comments).toHaveLength(2);
-          comments.forEach((comment) => {
-            expect(comment).toEqual(
-              expect.objectContaining({
-                comment_id: expect.any(Number),
-                votes: expect.any(Number),
-                created_at: expect.any(String),
-                author: expect.any(String),
-                body: expect.any(String),
-              })
-            );
-          });
+
+          expect(comments[0]).toEqual(
+            expect.objectContaining({
+              comment_id: expect.any(Number),
+              votes: expect.any(Number),
+              created_at: expect.any(String),
+              author: "butter_bridge",
+              body: expect.any(String),
+            })
+          );
         });
     });
     test("status 200: responds with an object with key comments and value of an empty array when an article has no comments", () => {
@@ -723,10 +722,10 @@ describe("/api/articles/:article_id/comments", () => {
             expect(comments).toHaveLength(10);
             expect(comments[0]).toEqual(
               expect.objectContaining({
-                comment_id: 2,
-                votes: 14,
+                comment_id: 5,
+                votes: 0,
                 created_at: expect.any(String),
-                author: "butter_bridge",
+                author: "icellusedkars",
                 body: expect.any(String),
               })
             );
