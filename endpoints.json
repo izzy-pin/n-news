@@ -71,7 +71,7 @@
     }
   },
   "GET /api/articles/:article_id/comments": {
-    "description": "serves an array of all the comments for an article",
+    "description": "serves an array of all the comments for an article, ordered newest to oldest",
     "queries": ["p", "limit"],
     "queryDescriptions": {
       "p": "specify page number of responses to display",
@@ -98,7 +98,7 @@
       "body": "love this article!"
     },
     "exampleResponse": {
-      "comments": {
+      "comment": {
         "comment_id": 19,
         "votes": 0,
         "created_at": 1586179020000,
@@ -138,7 +138,6 @@
   "GET /api/users/:username": {
     "description": "serves a user object for a valid username",
     "queries": [],
-    "parameter": "a valid article_id number",
     "exampleResponse": {
       "user": {
         "username": "icellusedkars",
