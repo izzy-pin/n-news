@@ -80,12 +80,12 @@ describe("/api/articles/:article_id", () => {
         .expect(404)
         .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
     });
-    test("status 404: responds with 'No article found for article_id: :article_id'", () => {
+    test("status 404: responds with 'No article found with id: :id'", () => {
       return request(app)
         .get("/api/articles/1000")
         .expect(404)
         .then(({ body: { msg } }) => {
-          expect(msg).toBe("No article found for article_id: 1000");
+          expect(msg).toBe("No article found with id: 1000");
         });
     });
     test("status 400: responds with 'Bad request'", () => {
@@ -194,15 +194,13 @@ describe("/api/articles/:article_id", () => {
             });
         });
     });
-    test("status 404: responds with 'No article found for article_id: :article_id, cannot update votes'", () => {
+    test("status 404: responds with 'No article found, cannot update votes'", () => {
       return request(app)
         .patch("/api/articles/2607")
         .send({ inc_votes: -100 })
         .expect(404)
         .then(({ body: { msg } }) => {
-          expect(msg).toBe(
-            "No article found for article_id: 2607, cannot update votes"
-          );
+          expect(msg).toBe("No article found, cannot update votes");
         });
     });
     test("status 400: responds with 'Bad request'", () => {
@@ -676,12 +674,12 @@ describe("/api/articles/:article_id/comments", () => {
         .expect(404)
         .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
     });
-    test("status 404: responds with 'No comments found for article_id: :article_id'", () => {
+    test("status 404: responds with 'No article found for: :id'", () => {
       return request(app)
         .get("/api/articles/1000/comments")
         .expect(404)
         .then(({ body: { msg } }) => {
-          expect(msg).toBe("No article found for article_id: 1000");
+          expect(msg).toBe("No article found with id: 1000");
         });
     });
     test("status 400: responds with 'Bad request'", () => {
@@ -846,13 +844,13 @@ describe("/api/articles/:article_id/comments", () => {
             });
         });
     });
-    test("status 404: responds with 'No article found for article_id: :article_id, cannot update votes'", () => {
+    test("status 404: responds with 'No article found with id: :id'", () => {
       return request(app)
         .post("/api/articles/2607/comments")
         .send({ username: "butter_bridge", body: "love this article!" })
         .expect(404)
         .then(({ body: { msg } }) => {
-          expect(msg).toBe("No article found for article_id: 2607");
+          expect(msg).toBe("No article found with id: 2607");
         })
         .then(() => {
           return db

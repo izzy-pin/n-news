@@ -11,7 +11,7 @@ exports.checkArticleExists = (id) => {
       if (rows.length === 0) {
         return Promise.reject({
           status: 404,
-          msg: `No article found for article_id: ${id}`,
+          msg: `No article found with id: ${id}`,
         });
       }
     });
@@ -51,7 +51,7 @@ exports.updateArticleByArticleId = (inc_votes, id) => {
       if (!voteTotal) {
         return Promise.reject({
           status: 404,
-          msg: `No article found for article_id: ${id}, cannot update votes`,
+          msg: `No article found, cannot update votes`,
         });
       }
     });
