@@ -1,19 +1,26 @@
-# news-rn API 📰
+# news rn API 📰
 
 ## What's it about?
 
-\*_coming soon_
+The news rn API serves content for its sister front-end site, a social news site. This back-end allows access to information from the news rn database, handles queries using ProstgreSQL and handles API calls using Express.js.
 
-## Find the app hosted on _Heroku_
+It was built using TDD and is deployed to Heroku using CI/CD and GitHub Actions.
 
-View all currently available endpoints [here](https://newsrn.herokuapp.com/api)
+## Find the API hosted on _Heroku_
+
+View all currently available endpoints, [here](https://newsrn.herokuapp.com/api)
+
+## Front-end
+
+View the site on Netlify, [here](https://newsrn.netlify.app/)
 
 ## Setup
 
 ### Clone
 
 - To copy this repo use
-  `git clone https://github.com/izzy-pin/news-rn.git`
+  `git clone https://github.com/izzy-pin/news-rn.git` in the directory you want to clone the repo to.
+- Navigate into the project folder with `cd news-rn`
 
 ### Install dependencies
 
@@ -30,7 +37,7 @@ This project uses:
 
 ### Create .env files
 
-- This project use dotenv to load the environment variables from the necessary env file into the process.env global object.
+- This project uses dotenv to load the environment variables from the necessary env file into the process.env global object.
 - So, we need to create 2 local .env files to determine which database to connect to.
 
   1.  The `.env.test` file will contain only the line `PGDATABASE=nc_news_test` and connect to our test database when running our test suite.
@@ -43,8 +50,8 @@ This project uses:
 
 ### Run the tests
 
-- This test suite makes use of jest, jest-sorted and supertest as devDependencies.
-- Use the command `npm test app` to run our test suite file.
+- This test suite makes use of jest, jest-sorted and supertest as devDependencies to test its endpoints.
+- Use the command `npm test app` to run the test suite file.
   - **jest** will set the `process.env` to `test` automatically to ensure we are only working with our test data.
 
 ### Minimum software versions needed for the project
