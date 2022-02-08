@@ -2,17 +2,19 @@
 
 ## What's it about?
 
-The news rn API serves content for its sister front-end site, a social news site. This back-end allows access to information from the news rn database, handles queries using ProstgreSQL and handles API calls using Express.js.
+The news rn API serves content for its front-end, a social news site. This back-end controls access to information in the news rn database, handling queries using ProstgreSQL and API calls with Express.js.
 
 It was built using TDD and is deployed to Heroku using CI/CD and GitHub Actions.
 
 ## Find the API hosted on _Heroku_
 
-View all currently available endpoints, [here](https://newsrn.herokuapp.com/api)
+- View all currently available endpoints [here](https://newsrn.herokuapp.com/api).
 
 ## Front-end
 
-View the site on Netlify, [here](https://newsrn.netlify.app/)
+- View the site on [Netlify](https://newsrn.netlify.app/).
+
+## Create your own
 
 ## Setup
 
@@ -56,7 +58,7 @@ This project uses:
 
 ### Minimum software versions needed for the project
 
-- Postgres v8.7.1,
+- Postgres v8.7.1
 - Node v16.9.1
 
 ---
