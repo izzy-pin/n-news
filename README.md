@@ -21,8 +21,8 @@ It was built using TDD and is deployed to Heroku using CI/CD and GitHub Actions.
 ### Clone
 
 - To copy this repo use
-  `git clone https://github.com/izzy-pin/news-rn.git` in the directory you want to clone the repo to.
-- Navigate into the project folder with `cd news-rn`
+  `https://github.com/izzy-pin/news-rn-back-end.git` in the directory you want to clone the repo to.
+- Navigate into the project folder with `cd news-rn-back-end`
 
 ### Install dependencies
 
