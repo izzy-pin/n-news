@@ -11,8 +11,9 @@
   },
   "GET /api/articles": {
     "description": "serves an array of all articles (newest to oldest), or all articles matching one or multiple queries",
-    "queries": ["topic", "sort_by", "order", "p", "limit"],
+    "queries": ["author", "topic", "sort_by", "order", "p", "limit"],
     "queryDescriptions": {
+      "author": "filters articles posted by a valid username",
       "topic": "filters articles by a valid topic slug",
       "sort_by": "sorts articles by valid article key and will default to date unless given an additional order query",
       "order": "asc orders articles alphabetically (if sort_by set to author, title, body or topic) or numerically lowest to highest (for article_id, votes, comment_count and created_at - meaning articles and comments are shown oldest to newest), desc sorts articles in reverse alphabetical or numerical order and order will default to descending",
