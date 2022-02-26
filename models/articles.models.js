@@ -1,4 +1,5 @@
 const db = require("../db/connection");
+const { checkUsernameExists } = require("./users.models");
 
 exports.checkArticleExists = (id) => {
   return db
@@ -58,6 +59,7 @@ exports.updateArticleByArticleId = (inc_votes, id) => {
 };
 
 exports.selectArticles = (
+  author,
   sort_by = "created_at",
   order = "desc",
   topic,
@@ -83,6 +85,7 @@ exports.selectArticles = (
   }
 
   let topicsCheck;
+  let authorCheck;
   if (topic) {
     topicsCheck = db
       .query(
@@ -97,7 +100,11 @@ exports.selectArticles = (
       });
   }
 
-  return Promise.all([topicsCheck]).then(() => {
+  if (author) {
+    authorCheck = checkUsernameExists(author);
+  }
+
+  return Promise.all([topicsCheck, authorCheck]).then(() => {
     let articlesQueryString = `
   SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, COUNT(comments.article_id) AS comment_count, COUNT(*) OVER ()::int AS total_count 
   FROM articles 
@@ -106,6 +113,11 @@ exports.selectArticles = (
 
     if (typeof topic === "string") {
       articlesQueryString += `WHERE articles.topic = '${topic}' `;
+    }
+
+    // for now can only use WHERE for either topic OR author
+    if (typeof author === "string") {
+      articlesQueryString += `WHERE articles.author = '${author}' `;
     }
 
     articlesQueryString += `GROUP BY articles.article_id
