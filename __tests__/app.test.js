@@ -396,6 +396,55 @@ describe("GET /api/articles", () => {
         .then(({ body: { msg } }) => expect(msg).toBe("Invalid order query"));
     });
   });
+  describe("author query", () => {
+    test("status 200: when query value is 'icellusedkars', return an array of articles of length 6", () => {
+      return request(app)
+        .get("/api/articles?author=icellusedkars")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(6);
+          expect(articles).toBeSortedBy("created_at", { descending: true });
+        });
+    });
+    test("status 200: when author query value is 'rogersop', return an array of articles of length 3", () => {
+      return request(app)
+        .get("/api/articles?author=rogersop")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(3);
+          expect(articles).toBeSortedBy("created_at", { descending: true });
+        });
+    });
+    test("status 200: when author query value is 'butter_bridge', return an array of articles of length 3", () => {
+      return request(app)
+        .get("/api/articles?author=butter_bridge")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(3);
+          expect(articles).toBeSortedBy("created_at", { descending: true });
+        });
+    });
+    test("status 200: when author query value is 'lurker', return an array of articles of length 0", () => {
+      return request(app)
+        .get("/api/articles?author=lurker")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(Array.isArray(articles)).toBe(true);
+          expect(articles).toHaveLength(0);
+        });
+    });
+    test("status 404: invalid author query responds with 'No user exists for username: lawnmowers'", () => {
+      return request(app)
+        .get("/api/articles?author=lawnmowers")
+        .expect(404)
+        .then(({ body: { msg } }) =>
+          expect(msg).toBe("No user exists for username: lawnmowers")
+        );
+    });
+  });
   describe("filter by topic query", () => {
     test("status 200: where query value topic 'mitch' exists, return a filtered by topic, sorted by date, desc", () => {
       return request(app)
