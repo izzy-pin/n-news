@@ -15,10 +15,10 @@
     "queryDescriptions": {
       "author": "filters articles posted by a valid username",
       "topic": "filters articles by a valid topic slug",
-      "sort_by": "sorts articles by valid article key and will default to date unless given an additional order query",
-      "order": "asc orders articles alphabetically (if sort_by set to author, title, body or topic) or numerically lowest to highest (for article_id, votes, comment_count and created_at - meaning articles and comments are shown oldest to newest), desc sorts articles in reverse alphabetical or numerical order and order will default to descending",
+      "sort_by": "defaults to date unless specified as author, title, topic, votes, comment_count",
+      "order": "either ascending or descending, order defaults to descending to show articles newest to oldest, ascending is used to order author, title and topic alphabetically",
       "p": "specify page number of responses to display",
-      "limit": "specficy how many responses per page"
+      "limit": "specify how many responses per page"
     },
     "exampleResponse": {
       "articles": [
@@ -73,8 +73,10 @@
   },
   "GET /api/articles/:article_id/comments": {
     "description": "serves an array of all the comments for an article, ordered newest to oldest",
-    "queries": ["p", "limit"],
+    "queries": ["sort_by", "order", "p", "limit"],
     "queryDescriptions": {
+      "sort_by": "sorts articles by created_at or vote, defaults to created_at",
+      "order": "desc or asc, order defaults to descending to show comments newest to oldest",
       "p": "specify page number of responses to display",
       "limit": "specify how many responses per page"
     },
