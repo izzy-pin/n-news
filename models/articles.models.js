@@ -2,6 +2,14 @@ const db = require("../db/connection");
 const { checkUsernameExists } = require("./users.models");
 
 exports.checkArticleExists = (id) => {
+  const numRegEx = /\D/;
+  if (numRegEx.test(id)) {
+    return Promise.reject({
+      status: 400,
+      msg: `Bad request`,
+    });
+  }
+
   return db
     .query(
       `SELECT * FROM articles WHERE article_id = $1
