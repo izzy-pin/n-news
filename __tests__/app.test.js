@@ -795,6 +795,64 @@ describe("/api/articles/:article_id/comments", () => {
           });
       });
     });
+    describe("sort_by and order queries", () => {
+      test("status 200: with only order=asc query, responds with object comments : array of comments, sorted oldest to newest ", () => {
+        return request(app)
+          .get("/api/articles/5/comments?order=asc")
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(Array.isArray(comments)).toBe(true);
+            expect(comments.length).toBe(2);
+            expect(comments).toBeSortedBy("created_at", { descending: false });
+          });
+      });
+      test("status 200: with sort_by=votes, responds with object comments, sorted by votes desc", () => {
+        return request(app)
+          .get("/api/articles/5/comments?sort_by=votes")
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(Array.isArray(comments)).toBe(true);
+            expect(comments.length).toBe(2);
+            expect(comments).toBeSortedBy("votes", { descending: true });
+          });
+      });
+      test("status 200: with sort_by=votes order=asc, responds with object comments, sorted by votes asc", () => {
+        return request(app)
+          .get("/api/articles/5/comments?sort_by=votes&order=asc")
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(Array.isArray(comments)).toBe(true);
+            expect(comments.length).toBe(2);
+            expect(comments).toBeSortedBy("votes", { descending: false });
+          });
+      });
+      test("status 400: bad request when sort_by or oder is an invalid string", () => {
+        return request(app)
+          .get("/api/articles/4/comments?sort_by=somethingelse")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe("Invalid sort_by query");
+          });
+      });
+      test("status 400: bad request when sort_by or order is an invalid string", () => {
+        return request(app)
+          .get("/api/articles/4/comments?order=somethingelse")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe("Invalid order query");
+          });
+      });
+      test("status 200: ignores all other queries a returns default queries", () => {
+        return request(app)
+          .get("/api/articles/1/comments?bananas=votes")
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(Array.isArray(comments)).toBe(true);
+            expect(comments.length).toBe(10);
+            expect(comments).toBeSortedBy("created_at", { descending: true });
+          });
+      });
+    });
   });
 
   describe("POST /api/articles/:article_id/comments", () => {
