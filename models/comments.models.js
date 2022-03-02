@@ -17,9 +17,22 @@ exports.checkCommentExists = (id) => {
     });
 };
 
-exports.selectCommentsByArticleId = (id, p = 0, limit = 10) => {
-  const numRegEx = /\D/;
+exports.selectCommentsByArticleId = (
+  id,
+  sort_by = "created_at",
+  order = "desc",
+  p = 0,
+  limit = 10
+) => {
+  if (!["created_at", "votes"].includes(sort_by)) {
+    return Promise.reject({ status: 400, msg: "Invalid sort_by query" });
+  }
 
+  if (!["asc", "desc"].includes(order)) {
+    return Promise.reject({ status: 400, msg: "Invalid order query" });
+  }
+
+  const numRegEx = /\D/;
   if (numRegEx.test(limit)) {
     return Promise.reject({
       status: 400,
@@ -36,20 +49,17 @@ exports.selectCommentsByArticleId = (id, p = 0, limit = 10) => {
 
   const start = p === 0 || p === 1 ? 0 : (p - 1) * limit;
 
-  return db
-    .query(
-      `SELECT comment_id, votes, created_at, body, author 
-        FROM comments 
-        WHERE article_id = $1
-        GROUP BY comment_id
-        ORDER BY created_at desc
-        LIMIT $2 OFFSET $3
-        ;`,
-      [id, limit, start]
-    )
-    .then((results) => {
-      return results.rows;
-    });
+  let commentsQueryString = `SELECT comment_id, votes, created_at, body, author 
+  FROM comments 
+  WHERE article_id = ${id}
+  GROUP BY comment_id `;
+
+  commentsQueryString += `ORDER BY ${sort_by} ${order} `;
+  commentsQueryString += `LIMIT ${limit} OFFSET ${start};`;
+
+  return db.query(commentsQueryString).then((results) => {
+    return results.rows;
+  });
 };
 
 exports.insertCommentForArticleId = (username, body, id) => {

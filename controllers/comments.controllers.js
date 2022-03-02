@@ -11,9 +11,9 @@ const { checkUsernameExists } = require("../models/users.models");
 
 exports.getCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
-  const { p, limit } = req.query;
+  const { sort_by, order, p, limit } = req.query;
   Promise.all([
-    selectCommentsByArticleId(article_id, p, limit),
+    selectCommentsByArticleId(article_id, sort_by, order, p, limit),
     checkArticleExists(article_id),
   ])
     .then(([comments]) => {
