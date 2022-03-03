@@ -3,6 +3,7 @@ const {
   updateArticleByArticleId,
   selectArticles,
   checkArticleExists,
+  insertArticle,
 } = require("../models/articles.models");
 
 exports.getArticleByArticleId = (req, res, next) => {
@@ -36,6 +37,18 @@ exports.getArticles = (req, res, next) => {
   selectArticles(author, sort_by, order, topic, limit, p)
     .then((articles) => {
       res.status(200).send(articles);
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.postArticle = (req, res, next) => {
+  const { title, body, topic, author } = req.body;
+
+  insertArticle(title, body, topic, author)
+    .then((article) => {
+      res.status(201).send(article);
     })
     .catch((err) => {
       next(err);

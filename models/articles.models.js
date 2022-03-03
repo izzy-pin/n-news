@@ -156,3 +156,34 @@ exports.selectArticles = (
     });
   });
 };
+
+exports.insertArticle = (title, body, topic, author) => {
+  if (!title || !body || !topic || !author) {
+    return Promise.reject({
+      status: 400,
+      msg: "Bad request, no empty or missing parameters",
+    });
+  }
+
+  return db
+    .query(
+      `INSERT INTO articles (title, body, topic, author)
+    VALUES ($1, $2, $3, $4) RETURNING article_id`,
+      [title, body, topic, author]
+    )
+    .then((result) => {
+      return db.query(
+        `
+      SELECT articles.*, COUNT(comments.article_id) AS comment_count 
+      FROM articles 
+      LEFT JOIN comments 
+      ON comments.article_id = articles.article_id 
+      WHERE articles.article_id = $1 
+      GROUP BY articles.article_id;`,
+        [result.rows[0].article_id]
+      );
+    })
+    .then((results) => {
+      return { article: results.rows[0] };
+    });
+};
