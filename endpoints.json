@@ -15,8 +15,8 @@
     "queryDescriptions": {
       "author": "filters articles posted by a valid username",
       "topic": "filters articles by a valid topic slug",
-      "sort_by": "defaults to date unless specified as author, title, topic, votes, comment_count",
-      "order": "either ascending or descending, order defaults to descending to show articles newest to oldest, ascending is used to order author, title and topic alphabetically",
+      "sort_by": "defaults to created_at unless specified as author, title, topic, votes, comment_count",
+      "order": "either asc or desc, order defaults to descending to show articles newest to oldest, ascending is used to order author, title and topic alphabetically",
       "p": "specify page number of responses to display",
       "limit": "specify how many responses per page"
     },
@@ -34,6 +34,28 @@
           "total_count": 15
         }
       ]
+    }
+  },
+  "POST /api/articles": {
+    "description": "posts a new article when the request body object includes a username, title, topic and body, it responds with an object of the new article",
+    "queries": [],
+    "request body": {
+      "author": "butter_bridge",
+      "title": "My first article ",
+      "body": "Lots of interesting information",
+      "topic": "coding"
+    },
+    "exampleResponse": {
+      "article": {
+        "article_id": 109,
+        "votes": 0,
+        "comment_count": 3,
+        "created_at": 1586179020000,
+        "author": "butter_bridge",
+        "title": "My first article ",
+        "body": "Lots of interesting information",
+        "topic": "coding"
+      }
     }
   },
   "GET /api/articles/:article_id": {
