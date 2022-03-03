@@ -52,10 +52,9 @@ exports.selectCommentsByArticleId = (
   let commentsQueryString = `SELECT comment_id, votes, created_at, body, author 
   FROM comments 
   WHERE article_id = ${id}
-  GROUP BY comment_id `;
-
-  commentsQueryString += `ORDER BY ${sort_by} ${order} `;
-  commentsQueryString += `LIMIT ${limit} OFFSET ${start};`;
+  GROUP BY comment_id 
+  ORDER BY ${sort_by} ${order} 
+  LIMIT ${limit} OFFSET ${start};`;
 
   return db.query(commentsQueryString).then((results) => {
     return results.rows;
