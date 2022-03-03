@@ -3,7 +3,6 @@ const testData = require("../db/data/test-data/index.js");
 const seed = require("../db/seeds/seed.js");
 const request = require("supertest");
 const app = require("../app");
-const e = require("express");
 
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
@@ -687,6 +686,90 @@ describe("GET /api/articles", () => {
   });
 });
 
+describe("POST /api/articles", () => {
+  test("status 201, responds with the posts article taken from req body", () => {
+    return request(app)
+      .post("/api/articles")
+      .send({
+        author: "lurker",
+        title: "Test Title",
+        body: "wow my very first article",
+        topic: "cats",
+      })
+      .expect(201)
+      .then(({ body: { article } }) => {
+        expect(article).toEqual(
+          expect.objectContaining({
+            author: "lurker",
+            title: "Test Title",
+            body: "wow my very first article",
+            topic: "cats",
+            article_id: 13,
+            votes: 0,
+            created_at: expect.any(String),
+            comment_count: "0",
+          })
+        );
+      });
+  });
+  test("status 400, missing title parameter in req body", () => {
+    return request(app)
+      .post("/api/articles")
+      .send({
+        author: "lurker",
+        title: "",
+        body: "wow my very first article",
+        topic: "cats",
+      })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request, no empty or missing parameters");
+      });
+  });
+  test("status 400, missing author parameter in req body", () => {
+    return request(app)
+      .post("/api/articles")
+      .send({
+        author: "",
+        title: "A title",
+        body: "wow my very first article",
+        topic: "cats",
+      })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request, no empty or missing parameters");
+      });
+  });
+  test("status 400, missing body parameter in req body", () => {
+    return request(app)
+      .post("/api/articles")
+      .send({
+        author: "lurke",
+        title: "A title",
+        body: "",
+        topic: "cats",
+      })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request, no empty or missing parameters");
+      });
+  });
+  test("status 400, missing topic parameter in req body", () => {
+    return request(app)
+      .post("/api/articles")
+      .send({
+        author: "lurker",
+        title: "A title",
+        body: "wow my very first article",
+        topic: "",
+      })
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request, no empty or missing parameters");
+      });
+  });
+});
+
 describe("/api/articles/:article_id/comments", () => {
   describe("GET /api/articles/:article_id/comments", () => {
     test("status 200: responds with object comments: array of comments of the given article_id, newest first", () => {
@@ -1095,80 +1178,6 @@ describe("DELETE /api/comments/:comment_id", () => {
   });
 });
 
-describe("GET /api", () => {
-  test("status 200, responds with json object of all available endpoints", () => {
-    return request(app)
-      .get("/api")
-      .expect(200)
-      .then(({ text }) => {
-        expect(typeof text).toBe("string");
-      });
-  });
-  test("status 404: responds with 'Path not found'", () => {
-    return request(app)
-      .get("/ap")
-      .expect(404)
-      .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
-  });
-});
-
-describe("GET /api/users", () => {
-  test("status 200, responds with an array of objects {username: 'username'} no name or avatar_url", () => {
-    return request(app)
-      .get("/api/users")
-      .expect(200)
-      .then(({ body: { users } }) => {
-        expect(Array.isArray(users)).toBe(true);
-        expect(users).toHaveLength(4);
-        users.forEach((user) => {
-          expect(user).toEqual(
-            expect.objectContaining({
-              username: expect.any(String),
-            })
-          );
-        });
-      });
-  });
-  test("status 404: responds with 'Path not found'", () => {
-    return request(app)
-      .get("/api/us")
-      .expect(404)
-      .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
-  });
-});
-
-describe("GET /api/users/:username", () => {
-  test("status 200, responds with a user object with properties username, avatar_url and name", () => {
-    return request(app)
-      .get("/api/users/lurker")
-      .expect(200)
-      .then(({ body: { user } }) => {
-        expect(user).toEqual(
-          expect.objectContaining({
-            username: "lurker",
-            name: "do_nothing",
-            avatar_url:
-              "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
-          })
-        );
-      });
-  });
-  test("status 404: responds with 'Path not found'", () => {
-    return request(app)
-      .get("/api/user/lurker")
-      .expect(404)
-      .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
-  });
-  test("status 404: responds with 'No user exists for username: :username'", () => {
-    return request(app)
-      .get("/api/users/1amJonSn0w")
-      .expect(404)
-      .then(({ body: { msg } }) => {
-        expect(msg).toBe("No user exists for username: 1amJonSn0w");
-      });
-  });
-});
-
 describe("PATCH /api/comments/:comment_id", () => {
   test("status 200, responds with updated comment when req body given a valid inc_votes int", () => {
     return request(app)
@@ -1282,6 +1291,80 @@ describe("PATCH /api/comments/:comment_id", () => {
           .then(({ rows }) => {
             expect(rows[0].votes).toBe(100);
           });
+      });
+  });
+});
+
+describe("GET /api", () => {
+  test("status 200, responds with json object of all available endpoints", () => {
+    return request(app)
+      .get("/api")
+      .expect(200)
+      .then(({ text }) => {
+        expect(typeof text).toBe("string");
+      });
+  });
+  test("status 404: responds with 'Path not found'", () => {
+    return request(app)
+      .get("/ap")
+      .expect(404)
+      .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
+  });
+});
+
+describe("GET /api/users", () => {
+  test("status 200, responds with an array of objects {username: 'username'} no name or avatar_url", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then(({ body: { users } }) => {
+        expect(Array.isArray(users)).toBe(true);
+        expect(users).toHaveLength(4);
+        users.forEach((user) => {
+          expect(user).toEqual(
+            expect.objectContaining({
+              username: expect.any(String),
+            })
+          );
+        });
+      });
+  });
+  test("status 404: responds with 'Path not found'", () => {
+    return request(app)
+      .get("/api/us")
+      .expect(404)
+      .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
+  });
+});
+
+describe("GET /api/users/:username", () => {
+  test("status 200, responds with a user object with properties username, avatar_url and name", () => {
+    return request(app)
+      .get("/api/users/lurker")
+      .expect(200)
+      .then(({ body: { user } }) => {
+        expect(user).toEqual(
+          expect.objectContaining({
+            username: "lurker",
+            name: "do_nothing",
+            avatar_url:
+              "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+          })
+        );
+      });
+  });
+  test("status 404: responds with 'Path not found'", () => {
+    return request(app)
+      .get("/api/user/lurker")
+      .expect(404)
+      .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
+  });
+  test("status 404: responds with 'No user exists for username: :username'", () => {
+    return request(app)
+      .get("/api/users/1amJonSn0w")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("No user exists for username: 1amJonSn0w");
       });
   });
 });
