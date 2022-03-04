@@ -260,6 +260,37 @@ describe("/api/articles/:article_id", () => {
             });
         });
     });
+    test("status 404: responds with 'Path not found'", () => {
+      return request(app)
+        .delete("/api/articls/12")
+        .expect(404)
+        .then(({ body: { msg } }) => expect(msg).toBe("Path not found"))
+        .then(() => {
+          return db
+            .query(
+              `SELECT exists (SELECT * FROM articles WHERE article_id = 12);`
+            )
+            .then(({ rows }) => {
+              expect(rows[0].exists).toBe(true);
+            });
+        });
+    });
+    test("status 404: responds with 'No article found with id: :article_id, cannot delete'", () => {
+      return request(app)
+        .delete("/api/articles/122607")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("No article found with id: 122607");
+        });
+    });
+    test("status 400: 'Bad request'", () => {
+      return request(app)
+        .delete("/api/articles/not-an-id")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request");
+        });
+    });
   });
 });
 
