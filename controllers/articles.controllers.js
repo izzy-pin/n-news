@@ -1,9 +1,11 @@
+const { send } = require("express/lib/response");
 const {
   selectArticleById,
   updateArticleByArticleId,
   selectArticles,
   checkArticleExists,
   insertArticle,
+  removeArticleById,
 } = require("../models/articles.models");
 
 exports.getArticleByArticleId = (req, res, next) => {
@@ -49,6 +51,17 @@ exports.postArticle = (req, res, next) => {
   insertArticle(title, body, topic, author)
     .then((article) => {
       res.status(201).send(article);
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.deleteArticleByArticleId = (req, res, next) => {
+  const { article_id } = req.params;
+  Promise.all([checkArticleExists(article_id), removeArticleById(article_id)])
+    .then(() => {
+      res.sendStatus(204);
     })
     .catch((err) => {
       next(err);

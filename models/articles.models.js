@@ -187,3 +187,12 @@ exports.insertArticle = (title, body, topic, author) => {
       return { article: results.rows[0] };
     });
 };
+
+exports.removeArticleById = (id) => {
+  return db.query(
+    `DELETE FROM articles 
+    WHERE article_id = $1
+    RETURNING *`,
+    [id]
+  );
+};
