@@ -244,6 +244,23 @@ describe("/api/articles/:article_id", () => {
         });
     });
   });
+
+  describe("DELETE /api/articles/:article_id", () => {
+    test("status 204: successfully deletes an article, no content returned", () => {
+      return request(app)
+        .delete("/api/articles/12")
+        .expect(204)
+        .then(() => {
+          return db
+            .query(
+              `SELECT exists (SELECT * FROM articles WHERE article_id = 12);`
+            )
+            .then(({ rows }) => {
+              expect(rows[0].exists).toBe(false);
+            });
+        });
+    });
+  });
 });
 
 describe("GET /api/articles", () => {
